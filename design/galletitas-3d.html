@@ -1,0 +1,893 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bagley Galletitas 3D</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Londrina+Solid:wght@400;900&family=Nunito:wght@600;800;900&family=Yellowtail&display=swap" rel="stylesheet">
+<style>
+:root {
+  /* Laboratorio: una galletita protagonista sobre el color de su paquete; UI mínima en los bordes. */
+  --rojo: #E3202A;
+  --rojo-hondo: #B3141C;
+  --amarillo: #FFD200;
+  --blanco: #FFFFFF;
+  --choco: #3A1A0F;
+  --bg1: #E3202A;
+  --bg2: #B3141C;
+  --ink: #FFD200;
+  --f-display: "Londrina Solid", "Arial Narrow", Impact, sans-serif;
+  --f-script: "Yellowtail", "Brush Script MT", cursive;
+  --f-body: "Nunito", "Trebuchet MS", system-ui, sans-serif;
+  color-scheme: light;
+}
+* { box-sizing: border-box; }
+html, body { height: 100%; margin: 0; }
+body {
+  background: radial-gradient(120% 90% at 50% 40%, var(--bg1), var(--bg2));
+  color: var(--blanco); font-family: var(--f-body); overflow: hidden;
+  transition: background .6s ease;
+}
+#gl { position: fixed; inset: 0; width: 100%; height: 100%; display: block; touch-action: none; cursor: grab; }
+#gl.dragging { cursor: grabbing; }
+.ui { position: fixed; z-index: 2; pointer-events: none; }
+.ui > * { pointer-events: auto; }
+.top { top: 18px; left: 22px; right: 22px; display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; }
+.logo { width: 132px; display: block; filter: drop-shadow(0 6px 10px rgba(0,0,0,.25)); }
+.toolbar { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
+button {
+  font: 900 13px/1 var(--f-body); letter-spacing: .6px; text-transform: uppercase;
+  border: 0; border-radius: 99px; padding: 11px 16px; cursor: pointer;
+  background: var(--blanco); color: var(--choco); box-shadow: 0 4px 0 rgba(0,0,0,.22);
+  transition: transform .15s ease, background .2s;
+}
+button:hover { transform: translateY(-2px); }
+button:active { transform: translateY(2px); box-shadow: 0 1px 0 rgba(0,0,0,.22); }
+button[aria-pressed="true"] { background: var(--choco); color: var(--amarillo); }
+:focus-visible { outline: 3px solid var(--amarillo); outline-offset: 3px; }
+
+.title { left: 26px; bottom: 112px; max-width: min(46ch, 44vw); pointer-events: none; }
+.title .idx { font-weight: 900; font-size: 12px; letter-spacing: 2px; text-transform: uppercase; opacity: .85; }
+.title h1 {
+  font-family: var(--f-display); font-weight: 900; font-size: clamp(56px, 9vw, 132px); line-height: .88; margin: 6px 0 10px;
+  color: var(--ink); text-shadow: 0 5px 0 rgba(0,0,0,.18);
+}
+.title h1.script { font-family: var(--f-script); font-weight: 400; }
+.title p { margin: 0; font-size: 16px; line-height: 1.5; font-weight: 600; max-width: 40ch; }
+
+.chips { left: 22px; right: 22px; bottom: 22px; display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.chips button { padding: 10px 14px; }
+.explode { right: 26px; bottom: 120px; width: 220px; display: grid; gap: 8px; font-weight: 900; font-size: 12px; letter-spacing: 1.5px; text-transform: uppercase; }
+.explode input { width: 100%; accent-color: var(--amarillo); }
+.hint { right: 26px; top: 50%; transform: translateY(-50%); text-align: right; font-size: 13px; font-weight: 800; line-height: 1.6; opacity: .9; pointer-events: none; }
+.hint b { font-family: var(--f-display); font-size: 22px; letter-spacing: .5px; display: block; color: var(--ink); }
+.toast {
+  position: fixed; left: 50%; top: 18%; transform: translate(-50%, -10px); z-index: 3;
+  background: var(--blanco); color: var(--choco); font-family: var(--f-display); font-size: 28px;
+  padding: 8px 18px 10px; border-radius: 14px; box-shadow: 0 0 0 4px var(--amarillo), 0 12px 20px rgba(0,0,0,.25);
+  opacity: 0; transition: opacity .25s, transform .25s; pointer-events: none; rotate: -3deg;
+}
+.toast.on { opacity: 1; transform: translate(-50%, 0); }
+.loading { position: fixed; inset: 0; display: grid; place-items: center; z-index: 4; background: var(--rojo); font-family: var(--f-display); font-size: 40px; color: var(--amarillo); transition: opacity .5s; }
+.loading.off { opacity: 0; pointer-events: none; }
+.err { position: fixed; inset: auto 20px 20px; background: var(--blanco); color: var(--rojo); padding: 14px; border-radius: 12px; font-weight: 800; z-index: 5; display: none; }
+
+@media (max-width: 760px) {
+  .title { bottom: auto; top: 110px; max-width: none; right: 22px; }
+  .title h1 { font-size: 64px; }
+  .title p { display: none; }
+  .hint { display: none; }
+  .explode { left: 22px; right: 22px; width: auto; bottom: 128px; }
+  .logo { width: 96px; }
+}
+</style>
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"
+} }
+</script>
+</head>
+<body>
+<canvas id="gl" aria-label="Galletita 3D: arrastrá para girarla, hacé click para morderla"></canvas>
+
+<div class="ui top">
+  <svg class="logo" viewBox="0 0 240 170" role="img" aria-label="Bagley">
+    <!-- canto del libro -->
+    <path d="M16 44 C56 22 96 22 120 38 C144 22 184 22 224 44 L218 150 C184 134 150 136 120 156 C90 136 56 134 22 150 Z" fill="#8E0E14" stroke="#FFD200" stroke-width="6" stroke-linejoin="round" transform="translate(0 6)"/>
+    <!-- tapa -->
+    <path d="M16 36 C56 14 96 14 120 30 C144 14 184 14 224 36 L218 142 C184 126 150 128 120 148 C90 128 56 126 22 142 Z" fill="#E3202A" stroke="#FFD200" stroke-width="6" stroke-linejoin="round"/>
+    <path d="M26 44 C60 26 96 26 120 40 C144 26 180 26 214 44" fill="none" stroke="#F0464E" stroke-width="3" opacity=".7"/>
+    <text x="122" y="104" text-anchor="middle" font-family="Yellowtail, cursive" font-size="66" fill="#FFFFFF" transform="rotate(-7 122 96)">Bagley</text>
+    <path d="M86 118 C120 112 160 104 196 84" fill="none" stroke="#FFFFFF" stroke-width="4.5" stroke-linecap="round" transform="rotate(-7 122 96)"/>
+  </svg>
+  <div class="toolbar">
+    <button id="btn-all" aria-pressed="false">Ver las 6</button>
+    <button id="btn-new">Galletita nueva</button>
+    <button id="btn-spin" aria-pressed="true">Girar sola</button>
+  </div>
+</div>
+
+<div class="ui title" aria-live="polite">
+  <div class="idx" id="p-idx">01 / 06</div>
+  <h1 id="p-name">Sonrisas</h1>
+  <p id="p-desc"></p>
+</div>
+
+<div class="ui hint"><b>Arrastrá</b>para girarla<br><b>Click</b>para morderla</div>
+
+<label class="ui explode" for="explode">Abrir la galletita
+  <input type="range" id="explode" min="0" max="1" step="0.01" value="0">
+</label>
+
+<nav class="ui chips" id="chips" aria-label="Elegí galletita"></nav>
+<div class="toast" id="toast" role="status"></div>
+<div class="loading" id="loading">Horneando…</div>
+<div class="err" id="err">Este navegador no pudo iniciar WebGL. Probá con Chrome, Edge, Firefox o Safari actualizados.</div>
+
+<script type="module">
+import * as THREE from 'three';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+
+/* ================================================================
+   Ruido y utilidades
+   ================================================================ */
+const fract = v => v - Math.floor(v);
+const hash = (x, y) => fract(Math.sin(x * 127.1 + y * 311.7) * 43758.5453);
+function vnoise(x, y) {
+  const xi = Math.floor(x), yi = Math.floor(y), xf = x - xi, yf = y - yi;
+  const u = xf * xf * (3 - 2 * xf), v = yf * yf * (3 - 2 * yf);
+  const a = hash(xi, yi), b = hash(xi + 1, yi), c = hash(xi, yi + 1), d = hash(xi + 1, yi + 1);
+  return a + (b - a) * u + (c - a) * v + (a - b - c + d) * u * v;
+}
+function fbm(x, y) { let s = 0, a = .5, f = 1; for (let i = 0; i < 4; i++) { s += a * vnoise(x * f, y * f); f *= 2.03; a *= .5; } return s; }
+const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
+const smooth = (a, b, v) => { const t = clamp((v - a) / (b - a), 0, 1); return t * t * (3 - 2 * t); };
+const lerp = (a, b, t) => a + (b - a) * t;
+let seedState = 1;
+const rnd = () => (seedState = (seedState * 16807) % 2147483647) / 2147483647;
+
+/* ================================================================
+   Funciones de distancia con signo (negativo = adentro)
+   ================================================================ */
+const sdCircle = (x, y, r) => Math.hypot(x, y) - r;
+function sdRoundRect(x, y, hw, hh, r) {
+  const qx = Math.abs(x) - hw + r, qy = Math.abs(y) - hh + r;
+  return Math.hypot(Math.max(qx, 0), Math.max(qy, 0)) + Math.min(Math.max(qx, qy), 0) - r;
+}
+// borde festoneado: lóbulos redondos hacia afuera y valles marcados
+function scallopRect(hw, hh, r, s, A) {
+  return (x, y) => {
+    const d = sdRoundRect(x, y, hw, hh, r);
+    const ax = Math.abs(x), ay = Math.abs(y);
+    const p = (hh - ay) < (hw - ax) ? x : y;
+    const lobe = Math.abs(Math.cos(Math.PI * p / s));
+    return d - A * Math.pow(lobe, .7);
+  };
+}
+function scallopCircle(R, n, A) {
+  return (x, y) => sdCircle(x, y, R) - A * Math.pow(Math.abs(Math.cos(n * Math.atan2(y, x) / 2)), .7);
+}
+const sub = (a, b) => (x, y) => Math.max(a(x, y), -b(x, y));
+const uni = (...fs) => (x, y) => { let m = Infinity; for (const f of fs) m = Math.min(m, f(x, y)); return m; };
+const inset = (f, k) => (x, y) => f(x, y) + k;
+
+/* ================================================================
+   Relieve: se dibuja en un canvas (blanco = sobresale) y se muestrea
+   ================================================================ */
+function makeRelief(bounds, draw, px = 1024, blur = 2.2) {
+  const [minx, maxx, miny, maxy] = bounds;
+  const W = maxx - minx, H = maxy - miny;
+  const cw = px, ch = Math.round(px * H / W), s = cw / W;
+  const c = document.createElement('canvas'); c.width = cw; c.height = ch;
+  const ctx = c.getContext('2d');
+  ctx.fillStyle = '#000'; ctx.fillRect(0, 0, cw, ch);
+  const P = (x, y) => [(x - minx) * s, (maxy - y) * s];
+  const S = v => v * s;
+  ctx.filter = `blur(${blur}px)`;
+  ctx.fillStyle = ctx.strokeStyle = '#fff';
+  ctx.lineCap = ctx.lineJoin = 'round';
+  draw(ctx, P, S);
+  ctx.filter = 'none';
+  const data = ctx.getImageData(0, 0, cw, ch).data;
+  const h = new Float32Array(cw * ch);
+  for (let i = 0; i < h.length; i++) h[i] = data[i * 4] / 255;
+  const sample = (x, y) => {
+    const fx = clamp((x - minx) * s, 0, cw - 1.001), fy = clamp((maxy - y) * s, 0, ch - 1.001);
+    const ix = fx | 0, iy = fy | 0, tx = fx - ix, ty = fy - iy, i = iy * cw + ix;
+    return lerp(lerp(h[i], h[i + 1], tx), lerp(h[i + cw], h[i + cw + 1], tx), ty);
+  };
+  return { sample, h, cw, ch, s };
+}
+
+// mapa de normales a partir del relieve + poros de masa horneada
+function makeNormalMap(relief, strength, poreAmt, poreScale) {
+  const { h, cw, ch } = relief;
+  const hh = new Float32Array(h.length);
+  for (let y = 0; y < ch; y++) for (let x = 0; x < cw; x++) {
+    const i = y * cw + x;
+    const pores = poreAmt * (fbm(x / poreScale, y / poreScale) + .5 * vnoise(x / (poreScale * .35), y / (poreScale * .35)));
+    hh[i] = h[i] * strength + pores;
+  }
+  const c = document.createElement('canvas'); c.width = cw; c.height = ch;
+  const ctx = c.getContext('2d'); const img = ctx.createImageData(cw, ch); const d = img.data;
+  for (let y = 0; y < ch; y++) for (let x = 0; x < cw; x++) {
+    const xl = Math.max(x - 1, 0), xr = Math.min(x + 1, cw - 1), yu = Math.max(y - 1, 0), yd = Math.min(y + 1, ch - 1);
+    const dx = hh[y * cw + xr] - hh[y * cw + xl];
+    const dy = hh[yu * cw + x] - hh[yd * cw + x];
+    let nx = -dx, ny = -dy, nz = 1; const l = Math.hypot(nx, ny, nz); nx /= l; ny /= l; nz /= l;
+    const k = (y * cw + x) * 4;
+    d[k] = (nx * .5 + .5) * 255; d[k + 1] = (ny * .5 + .5) * 255; d[k + 2] = (nz * .5 + .5) * 255; d[k + 3] = 255;
+  }
+  ctx.putImageData(img, 0, 0);
+  const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.NoColorSpace; t.anisotropy = 8;
+  return t;
+}
+
+// textura de color fina: puntitos de horneado, azúcar, harina
+function makeSpeckle(seed, dark, light, density = 9000) {
+  const c = document.createElement('canvas'); c.width = c.height = 1024;
+  const ctx = c.getContext('2d');
+  ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, 1024, 1024);
+  seedState = seed;
+  for (let i = 0; i < density; i++) {
+    const x = rnd() * 1024, y = rnd() * 1024, r = .4 + rnd() * 1.6;
+    ctx.fillStyle = rnd() < .7 ? dark : light;
+    ctx.globalAlpha = .08 + rnd() * .22;
+    ctx.beginPath(); ctx.arc(x, y, r, 0, 6.283); ctx.fill();
+  }
+  const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 8;
+  return t;
+}
+
+/* ================================================================
+   Malla de una mitad (cara superior o inferior) a partir de la SDF.
+   Grilla densa; los vértices de afuera se "pegan" al contorno, así
+   la silueta queda limpia (festones, agujeros y mordiscos incluidos).
+   ================================================================ */
+function buildHalf(sdf, o) {
+  const [minx, maxx, miny, maxy] = o.bounds;
+  const step = Math.max(maxx - minx, maxy - miny) / o.res;
+  const nx = Math.ceil((maxx - minx) / step) + 1, ny = Math.ceil((maxy - miny) / step) + 1;
+  const N = nx * ny;
+  const pos = new Float32Array(N * 3), uv = new Float32Array(N * 2), col = new Float32Array(N * 3);
+  const inside = new Uint8Array(N), used = new Uint8Array(N);
+  const e = 1e-3;
+  for (let j = 0; j < ny; j++) for (let i = 0; i < nx; i++) {
+    const k = j * nx + i;
+    let x = minx + i * step, y = miny + j * step, d = sdf(x, y), z = 0, t = 0;
+    if (d <= 0) {
+      inside[k] = 1; t = -d;
+      z = o.height(x, y, t);
+    } else if (d < step * 1.6) {
+      for (let it = 0; it < 4 && Math.abs(d) > 1e-5; it++) {
+        const gx = (sdf(x + e, y) - sdf(x - e, y)) / (2 * e), gy = (sdf(x, y + e) - sdf(x, y - e)) / (2 * e);
+        const gl = Math.hypot(gx, gy) || 1;
+        x -= gx / gl * d; y -= gy / gl * d; d = sdf(x, y);
+      }
+      z = 0;
+    }
+    pos[k * 3] = x; pos[k * 3 + 1] = y; pos[k * 3 + 2] = z * o.sign;
+    uv[k * 2] = (x - minx) / (maxx - minx); uv[k * 2 + 1] = (y - miny) / (maxy - miny);
+    const c = o.color(x, y, t);
+    col[k * 3] = c.r; col[k * 3 + 1] = c.g; col[k * 3 + 2] = c.b;
+  }
+  const idx = [];
+  const push = (a, b, c) => {
+    if (!(inside[a] || inside[b] || inside[c])) return;
+    if (o.sign > 0) idx.push(a, b, c); else idx.push(a, c, b);
+    used[a] = used[b] = used[c] = 1;
+  };
+  for (let j = 0; j < ny - 1; j++) for (let i = 0; i < nx - 1; i++) {
+    const a = j * nx + i, b = a + 1, c = a + nx, d = c + 1;
+    // diagonal alternada para que el borde no quede serruchado
+    if ((i + j) & 1) { push(a, b, d); push(a, d, c); } else { push(a, b, c); push(b, d, c); }
+  }
+  const g = new THREE.BufferGeometry();
+  g.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+  g.setAttribute('uv', new THREE.BufferAttribute(uv, 2));
+  g.setAttribute('color', new THREE.BufferAttribute(col, 3));
+  g.setIndex(idx);
+  g.computeVertexNormals();
+  return g;
+}
+
+/* ================================================================
+   Las seis galletitas
+   ================================================================ */
+const C = h => new THREE.Color(h);
+
+// ---------- Sonrisas: redonda, manteca pálida, cara calada, mermelada roja
+const sonrisasOuter = (x, y) => sdCircle(x, y, 1) + .012 * (vnoise(Math.atan2(y, x) * 4 + 10, 3) - .5);
+const sonrisasFace = uni(
+  (x, y) => sdRoundRect(x + .27, y - .2, .1, .125, .06),
+  (x, y) => sdRoundRect(x - .27, y - .2, .1, .125, .06),
+  (x, y) => Math.max(sdCircle(x, y + .02, .44), -sdCircle(x, y - .2, .5)) - .005
+);
+
+// ---------- Rumba: cuadrada festoneada, chocolate mate, guarda de rayitas y personaje
+const rumbaOuter = scallopRect(1.0, .85, .1, .1, .035);
+const rumbaEyes = uni((x, y) => sdCircle(x + .12, y - .1, .042), (x, y) => sdCircle(x - .12, y - .1, .042));
+
+// ---------- Chocolinas: rectangular festoneada, cacao oscuro, filigrana
+const chocoOuter = scallopRect(1.25, .6, .08, .05, .022);
+
+// ---------- Opera: oblea rectangular con cuadriculado y escudo
+const operaOuter = (x, y) => sdRoundRect(x, y, 1.35, .62, .035);
+
+// ---------- Merengadas: redonda festoneada con merengue rosa
+const merenOuter = scallopCircle(.95, 30, .03);
+
+// ---------- Mellizas: rectangular festoneada dorada con crema blanca
+const mellizasOuter = scallopRect(1.2, .8, .1, .1, .035);
+
+function dashedRoundRect(ctx, P, S, hw, hh, r, dash, gap, w) {
+  const [x0, y0] = P(-hw, hh);
+  ctx.lineWidth = S(w); ctx.setLineDash([S(dash), S(gap)]);
+  ctx.beginPath(); ctx.roundRect(x0, y0, S(hw * 2), S(hh * 2), S(r)); ctx.stroke(); ctx.setLineDash([]);
+}
+
+const PRODUCTS = [
+  {
+    id: 'sonrisas', name: 'Sonrisas', tag: 'La que te sonríe de vuelta',
+    desc: 'Masa de manteca, cara calada y relleno sabor frambuesa que se asoma por los ojos y la sonrisa.',
+    bg: ['#F46AA6', '#C42A6E'], ink: '#FFFFFF', script: true,
+    layers: [
+      { kind: 'cookie', sdf: sonrisasOuter, H: .085, R: .085, relief: 'sonrisasBack' },
+      { kind: 'fill', sdf: inset(sonrisasOuter, .045), H: .028, color: '#C4122F', rough: .28, coat: .7, wobble: .02 },
+      { kind: 'cookie', sdf: sub(sonrisasOuter, sonrisasFace), H: .085, R: .085, relief: 'sonrisas' },
+    ],
+    dough: { base: '#F6DA86', edge: '#E9BF5E', raised: '#F9E29A', bottom: '#EDC86A', rough: .72, sheen: .5, speckDark: '#C8913A', speckLight: '#FFF6D8' },
+  },
+  {
+    id: 'rumba', name: 'Rumba', tag: 'La del recreo',
+    desc: 'Dos tapitas sabor chocolate festoneadas, con su personaje en relieve y relleno sabor coco.',
+    bg: ['#FFD200', '#E3A800'], ink: '#5B2E17',
+    layers: [
+      { kind: 'cookie', sdf: rumbaOuter, H: .07, R: .05, relief: 'plainChoco' },
+      { kind: 'fill', sdf: inset((x, y) => sdRoundRect(x, y, .98, .83, .12), .06), H: .055, color: '#F7F2E8', rough: .55, coat: .1, wobble: .025 },
+      { kind: 'cookie', sdf: sub(rumbaOuter, rumbaEyes), H: .07, R: .05, relief: 'rumba' },
+    ],
+    dough: { base: '#6A3A24', edge: '#4E2716', raised: '#7B4630', bottom: '#57301D', rough: .9, sheen: .35, speckDark: '#2E140A', speckLight: '#9A6A50' },
+  },
+  {
+    id: 'chocolinas', name: 'Chocolinas', tag: 'La de la chocotorta',
+    desc: 'Finitas, de chocolate, con borde festoneado. Nacieron para mojarse en café con leche y apilarse.',
+    bg: ['#6A37A8', '#3F1C72'], ink: '#FFD200', script: true,
+    layers: [{ kind: 'cookie', sdf: chocoOuter, H: .065, R: .045, relief: 'chocolinas' }],
+    dough: { base: '#4A2618', edge: '#36190E', raised: '#5A3020', bottom: '#3C1D11', rough: .85, sheen: .3, speckDark: '#1E0C05', speckLight: '#7A4A35' },
+  },
+  {
+    id: 'opera', name: 'Opera', tag: 'La del crunch',
+    desc: 'Obleas crocantes en capas con relleno sabor naranja. Se parten justo por la mitad, o eso dicen.',
+    bg: ['#E9ECF1', '#AEB5C0'], ink: '#1B2A6B', script: true,
+    layers: [
+      { kind: 'cookie', sdf: operaOuter, H: .045, R: .018, relief: 'operaBack', wafer: true },
+      { kind: 'fill', sdf: inset(operaOuter, .012), H: .026, color: '#FBE6BE', rough: .7, coat: 0, wobble: .006 },
+      { kind: 'cookie', sdf: operaOuter, H: .045, R: .018, relief: 'operaBack', wafer: true },
+      { kind: 'fill', sdf: inset(operaOuter, .012), H: .026, color: '#FBE6BE', rough: .7, coat: 0, wobble: .006 },
+      { kind: 'cookie', sdf: operaOuter, H: .045, R: .018, relief: 'opera', wafer: true },
+    ],
+    dough: { base: '#F5DD98', edge: '#E8C46F', raised: '#F8E6AE', bottom: '#EFD185', rough: .82, sheen: .6, speckDark: '#D2A752', speckLight: '#FFF8E2' },
+  },
+  {
+    id: 'merengadas', name: 'Merengadas', tag: 'La del merengue rosa',
+    desc: 'Dos galletitas festoneadas y en el medio una nube de merengue rosa, alta y esponjosa.',
+    bg: ['#4DB6EA', '#1C80C2'], ink: '#F7A6C8', script: true,
+    layers: [
+      { kind: 'cookie', sdf: merenOuter, H: .06, R: .05, relief: 'plainGold' },
+      { kind: 'fill', sdf: inset(sdCircle.bind(null), 0), sdfFn: (x, y) => sdCircle(x, y, .9), H: .2, color: '#F59BC3', rough: .85, coat: 0, wobble: .05, foam: true },
+      { kind: 'cookie', sdf: merenOuter, H: .06, R: .05, relief: 'merengadas' },
+    ],
+    dough: { base: '#EDBE6C', edge: '#D59A45', raised: '#F3CD82', bottom: '#DCA653', rough: .78, sheen: .45, speckDark: '#B5772C', speckLight: '#FFF0CC' },
+  },
+  {
+    id: 'mellizas', name: 'Mellizas', tag: 'Las inseparables',
+    desc: 'Dos tapitas doradas y festoneadas, unidas por una capa de crema blanca. Siempre de a dos.',
+    bg: ['#E3202A', '#A50F17'], ink: '#FFD200', script: true,
+    layers: [
+      { kind: 'cookie', sdf: mellizasOuter, H: .065, R: .05, relief: 'plainGold' },
+      { kind: 'fill', sdf: inset((x, y) => sdRoundRect(x, y, 1.18, .78, .14), .07), H: .05, color: '#FDF9EF', rough: .5, coat: .15, wobble: .02 },
+      { kind: 'cookie', sdf: mellizasOuter, H: .065, R: .05, relief: 'mellizas' },
+    ],
+    dough: { base: '#ECC071', edge: '#D49A48', raised: '#F4D08A', bottom: '#DDA95A', rough: .78, sheen: .45, speckDark: '#B07530', speckLight: '#FFF1CF' },
+  },
+];
+// la sdf de Merengadas usa la función directa
+PRODUCTS[4].layers[1].sdf = PRODUCTS[4].layers[1].sdfFn;
+
+/* ---------- dibujos del relieve ---------- */
+const RELIEFS = {
+  sonrisas(ctx, P, S) {
+    // guarda de garabatos ondulados cerca del borde, como en la galletita real
+    ctx.lineWidth = S(.03);
+    seedState = 11;
+    for (let k = 0; k < 13; k++) {
+      const a0 = k / 13 * Math.PI * 2 + rnd() * .2, len = .32 + rnd() * .12;
+      ctx.beginPath();
+      for (let s = 0; s <= 24; s++) {
+        const a = a0 + len * s / 24, r = .8 + .035 * Math.sin(s * 1.3 + k);
+        const [px, py] = P(Math.cos(a) * r, Math.sin(a) * r);
+        s ? ctx.lineTo(px, py) : ctx.moveTo(px, py);
+      }
+      ctx.stroke();
+    }
+    // cachetes y cejas suaves
+    ctx.lineWidth = S(.022);
+    for (const sx of [-1, 1]) {
+      ctx.beginPath(); const [cx, cy] = P(sx * .42, -.08); ctx.arc(cx, cy, S(.06), 0, Math.PI * 2); ctx.stroke();
+      ctx.beginPath(); const [bx, by] = P(sx * .27, .4); ctx.ellipse(bx, by, S(.1), S(.03), sx * .2, Math.PI, 0); ctx.stroke();
+    }
+  },
+  sonrisasBack(ctx, P, S) { ctx.lineWidth = S(.02); const [cx, cy] = P(0, 0); ctx.beginPath(); ctx.arc(cx, cy, S(.84), 0, 6.283); ctx.stroke(); },
+  rumba(ctx, P, S) {
+    // guarda de rayitas siguiendo el contorno
+    dashedRoundRect(ctx, P, S, .84, .69, .1, .07, .045, .032);
+    // marco central
+    ctx.lineWidth = S(.028);
+    const [fx, fy] = P(-.5, .42); ctx.beginPath(); ctx.roundRect(fx, fy, S(1), S(.84), S(.08)); ctx.stroke();
+    // personaje: cara con cejas, nariz y sonrisa (los ojos son agujeros)
+    ctx.lineWidth = S(.03);
+    ctx.beginPath(); let [x1, y1] = P(-.22, .24); let [x2, y2] = P(-.04, .2); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke();
+    ctx.beginPath(); [x1, y1] = P(.22, .24); [x2, y2] = P(.04, .2); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke();
+    ctx.beginPath(); const [mx, my] = P(0, -.02); ctx.arc(mx, my, S(.16), .2, Math.PI - .2); ctx.stroke();
+    ctx.beginPath(); [x1, y1] = P(0, .06); [x2, y2] = P(-.03, -.02); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke();
+    // brazos y piernas de la figura que baila
+    ctx.lineWidth = S(.026);
+    const lines = [[-.36, -.2, -.2, -.34], [.36, -.2, .2, -.34], [-.2, -.34, -.3, -.32], [.2, -.34, .32, -.3]];
+    for (const [a, b, c, d] of lines) { ctx.beginPath(); [x1, y1] = P(a, b); [x2, y2] = P(c, d); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke(); }
+  },
+  plainChoco(ctx, P, S) { dashedRoundRect(ctx, P, S, .84, .69, .1, .07, .045, .02); },
+  chocolinas(ctx, P, S) {
+    dashedRoundRect(ctx, P, S, 1.1, .46, .06, .05, .035, .026);
+    // filigrana de hojitas y espirales
+    ctx.lineWidth = S(.018);
+    for (let gx = -.9; gx <= .91; gx += .3) for (let gy = -.2; gy <= .21; gy += .4) {
+      const flip = Math.round((gx + gy) * 10) % 2 ? 1 : -1;
+      const [cx, cy] = P(gx, gy);
+      ctx.beginPath(); ctx.arc(cx, cy, S(.07), 0, Math.PI * 1.5 * flip, flip < 0); ctx.stroke();
+      for (const a of [0, 2.1, 4.2]) {
+        const [lx, ly] = P(gx + Math.cos(a) * .1, gy + Math.sin(a) * .1);
+        ctx.beginPath(); ctx.ellipse(lx, ly, S(.045), S(.018), -a, 0, 6.283); ctx.fill();
+      }
+    }
+    ctx.font = `400 ${S(.2)}px Yellowtail`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  },
+  opera(ctx, P, S) {
+    // cuadriculado de oblea
+    ctx.lineWidth = S(.02);
+    for (let x = -1.32; x <= 1.33; x += .11) { ctx.beginPath(); const [a, b] = P(x, .6); const [c, d] = P(x, -.6); ctx.moveTo(a, b); ctx.lineTo(c, d); ctx.stroke(); }
+    for (let y = -.6; y <= .61; y += .11) { ctx.beginPath(); const [a, b] = P(-1.33, y); const [c, d] = P(1.33, y); ctx.moveTo(a, b); ctx.lineTo(c, d); ctx.stroke(); }
+    // escudo ovalado con el nombre, liso adentro
+    const [cx, cy] = P(0, 0);
+    ctx.fillStyle = '#000'; ctx.beginPath(); ctx.ellipse(cx, cy, S(.42), S(.24), 0, 0, 6.283); ctx.fill();
+    ctx.fillStyle = '#fff'; ctx.lineWidth = S(.035); ctx.beginPath(); ctx.ellipse(cx, cy, S(.42), S(.24), 0, 0, 6.283); ctx.stroke();
+    ctx.font = `400 ${S(.26)}px Yellowtail`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('Opera', cx, cy + S(.01));
+  },
+  operaBack(ctx, P, S) {
+    ctx.lineWidth = S(.02);
+    for (let x = -1.32; x <= 1.33; x += .11) { ctx.beginPath(); const [a, b] = P(x, .6); const [c, d] = P(x, -.6); ctx.moveTo(a, b); ctx.lineTo(c, d); ctx.stroke(); }
+    for (let y = -.6; y <= .61; y += .11) { ctx.beginPath(); const [a, b] = P(-1.33, y); const [c, d] = P(1.33, y); ctx.moveTo(a, b); ctx.lineTo(c, d); ctx.stroke(); }
+  },
+  merengadas(ctx, P, S) {
+    const [cx, cy] = P(0, 0);
+    ctx.lineWidth = S(.026); ctx.beginPath(); ctx.arc(cx, cy, S(.8), 0, 6.283); ctx.stroke();
+    for (let k = 0; k < 40; k++) { const a = k / 40 * 6.283; const [x, y] = P(Math.cos(a) * .72, Math.sin(a) * .72); ctx.beginPath(); ctx.arc(x, y, S(.02), 0, 6.283); ctx.fill(); }
+    for (let k = 0; k < 12; k++) {
+      const a = k / 12 * 6.283; const [x, y] = P(Math.cos(a) * .32, Math.sin(a) * .32);
+      ctx.beginPath(); ctx.ellipse(x, y, S(.17), S(.06), -a, 0, 6.283); ctx.fill();
+    }
+    ctx.fillStyle = '#000'; ctx.beginPath(); ctx.arc(cx, cy, S(.12), 0, 6.283); ctx.fill();
+    ctx.fillStyle = '#fff'; ctx.lineWidth = S(.03); ctx.beginPath(); ctx.arc(cx, cy, S(.12), 0, 6.283); ctx.stroke();
+  },
+  plainGold(ctx, P, S) { const [cx, cy] = P(0, 0); ctx.lineWidth = S(.02); ctx.globalAlpha = .5; ctx.beginPath(); ctx.arc(cx, cy, S(.5), 0, 6.283); ctx.stroke(); ctx.globalAlpha = 1; },
+  mellizas(ctx, P, S) {
+    dashedRoundRect(ctx, P, S, 1.02, .62, .1, .02, .045, .04);
+    ctx.lineWidth = S(.026);
+    const [x0, y0] = P(-.86, .46); ctx.beginPath(); ctx.roundRect(x0, y0, S(1.72), S(.92), S(.1)); ctx.stroke();
+    const [cx, cy] = P(0, -.02);
+    ctx.font = `400 ${S(.42)}px Yellowtail`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.save(); ctx.translate(cx, cy); ctx.rotate(-.12); ctx.fillText('Mellizas', 0, 0); ctx.restore();
+  },
+};
+
+/* ================================================================
+   Armado de cada galletita (capas, materiales, mordiscos)
+   ================================================================ */
+const RES = matchMedia('(max-width: 760px)').matches ? 150 : 230;
+
+class Cookie {
+  constructor(spec) {
+    this.spec = spec;
+    this.root = new THREE.Group();
+    this.inner = new THREE.Group();
+    this.root.add(this.inner);
+    this.bites = [];
+    this.explode = 0;
+    this.layers = [];
+    const d = spec.dough;
+    const ext = .12;
+    let bx = 0, by = 0;
+    for (let x = -1.6; x <= 1.6; x += .02) for (let y = -1.2; y <= 1.2; y += .02) if (spec.layers[0].sdf(x, y) < 0) { bx = Math.max(bx, Math.abs(x)); by = Math.max(by, Math.abs(y)); }
+    this.bounds = [-bx - ext, bx + ext, -by - ext, by + ext];
+    this.reliefCache = {};
+    this.speck = makeSpeckle(spec.id.length * 977 + 3, d.speckDark, d.speckLight);
+    this.matsByRelief = {};
+
+    let z = 0; const zs = [];
+    for (const L of spec.layers) { const t = L.H * 2; zs.push(z + t / 2); z += t; }
+    const total = z;
+    spec.layers.forEach((L, i) => {
+      const layer = { spec: L, baseZ: zs[i] - total / 2, meshes: [] };
+      if (L.kind === 'cookie') {
+        const relief = this.getRelief(L.relief);
+        const flat = this.getRelief(L.wafer ? 'operaBack' : 'none');
+        layer.relief = relief; layer.flat = flat;
+        layer.topMat = this.cookieMat(relief, L.wafer ? .55 : .9);
+        layer.botMat = this.cookieMat(flat, L.wafer ? .55 : .9);
+      } else {
+        layer.mat = new THREE.MeshPhysicalMaterial({
+          color: 0xffffff, roughness: L.rough, clearcoat: L.coat, clearcoatRoughness: .25,
+          sheen: L.foam ? .8 : .2, sheenColor: C('#ffffff'), sheenRoughness: .6,
+          normalMap: L.foam ? this.foamNormal() : null, normalScale: new THREE.Vector2(.9, .9),
+        });
+      }
+      this.layers.push(layer);
+    });
+    this.rebuild();
+  }
+  getRelief(name) {
+    if (!this.reliefCache[name]) {
+      const draw = RELIEFS[name] || (() => {});
+      this.reliefCache[name] = makeRelief(this.bounds, draw);
+    }
+    return this.reliefCache[name];
+  }
+  foamNormal() {
+    const r = makeRelief(this.bounds, (ctx, P, S) => {
+      seedState = 77;
+      for (let i = 0; i < 2600; i++) { const x = (rnd() * 2 - 1) * 1.1, y = (rnd() * 2 - 1) * 1.1; const [px, py] = P(x, y); ctx.globalAlpha = .3 + rnd() * .7; ctx.beginPath(); ctx.arc(px, py, S(.008 + rnd() * .02), 0, 6.283); ctx.fill(); }
+    }, 1024, 1.2);
+    return makeNormalMap(r, 2.2, .2, 18);
+  }
+  cookieMat(relief, poreAmt) {
+    const d = this.spec.dough;
+    const key = relief === this.reliefCache.none ? 'flat' : Object.keys(this.reliefCache).find(k => this.reliefCache[k] === relief);
+    if (this.matsByRelief[key + poreAmt]) return this.matsByRelief[key + poreAmt];
+    const m = new THREE.MeshPhysicalMaterial({
+      vertexColors: true, map: this.speck,
+      normalMap: makeNormalMap(relief, 3.2, poreAmt * .45, 7), normalScale: new THREE.Vector2(1, 1),
+      roughness: d.rough, sheen: d.sheen, sheenColor: C(d.speckLight), sheenRoughness: .8,
+    });
+    return (this.matsByRelief[key + poreAmt] = m);
+  }
+  currentSdf(base) {
+    if (!this.bites.length) return base;
+    const bites = this.bites;
+    return (x, y) => {
+      let m = Infinity;
+      for (const b of bites) for (const t of b.teeth) m = Math.min(m, Math.hypot(x - t[0], y - t[1]) - t[2]);
+      return Math.max(base(x, y), -m);
+    };
+  }
+  rebuild() {
+    const d = this.spec.dough;
+    const base = C(d.base), edge = C(d.edge), raised = C(d.raised), bottom = C(d.bottom);
+    const tmp = new THREE.Color();
+    for (const layer of this.layers) {
+      for (const m of layer.meshes) { m.geometry.dispose(); this.inner.remove(m); }
+      layer.meshes = [];
+      const L = layer.spec;
+      const sdf = this.currentSdf(L.sdf);
+      if (L.kind === 'cookie') {
+        const R = L.R, H = L.H, rel = layer.relief;
+        const prof = t => { const u = Math.min(t / R, 1); return Math.sqrt(1 - (1 - u) * (1 - u)); };
+        const top = buildHalf(sdf, {
+          bounds: this.bounds, res: RES, sign: 1,
+          height: (x, y, t) => H * prof(t) + .028 * rel.sample(x, y) * smooth(R * .4, R * 1.6, t) + .006 * (fbm(x * 9, y * 9) - .5) + .012 * smooth(0, .9, t),
+          color: (x, y, t) => {
+            const ek = 1 - smooth(0, R * 3, t);
+            tmp.copy(base).lerp(edge, ek * .9).lerp(raised, rel.sample(x, y) * .55);
+            const n = .9 + .2 * fbm(x * 2.5 + 5, y * 2.5);
+            return tmp.multiplyScalar(n).clone();
+          },
+        });
+        const bot = buildHalf(sdf, {
+          bounds: this.bounds, res: RES, sign: -1,
+          height: (x, y, t) => H * prof(t) * .92 + .004 * (fbm(x * 7 + 3, y * 7) - .5),
+          color: (x, y, t) => { const ek = 1 - smooth(0, R * 2, t); tmp.copy(bottom).lerp(edge, ek * .7); return tmp.multiplyScalar(.88 + .2 * fbm(x * 3, y * 3 + 9)).clone(); },
+        });
+        const mt = new THREE.Mesh(top, layer.topMat), mb = new THREE.Mesh(bot, layer.botMat);
+        layer.meshes.push(mt, mb);
+      } else {
+        const H = L.H, w = L.wobble;
+        const fs = (x, y) => sdf(x, y) - w * (fbm(x * 3 + 1, y * 3) - .45);
+        const fc = C(L.color);
+        const half = sign => buildHalf(fs, {
+          bounds: this.bounds, res: Math.round(RES * .7), sign,
+          height: (x, y, t) => { const u = Math.min(t / H, 1); return H * Math.sqrt(1 - (1 - u) * (1 - u)) + (L.foam ? .03 * fbm(x * 6, y * 6) * smooth(0, .1, t) : 0); },
+          color: (x, y, t) => { tmp.copy(fc).multiplyScalar(.94 + .1 * fbm(x * 4, y * 4)); if (L.foam && hash(Math.round(x * 60), Math.round(y * 60)) > .965) tmp.set('#ffffff'); return tmp.clone(); },
+        });
+        layer.mat.vertexColors = true;
+        layer.meshes.push(new THREE.Mesh(half(1), layer.mat), new THREE.Mesh(half(-1), layer.mat));
+      }
+      for (const m of layer.meshes) { m.castShadow = true; m.receiveShadow = true; this.inner.add(m); }
+    }
+    this.applyExplode();
+  }
+  applyExplode() {
+    const n = this.layers.length, mid = (n - 1) / 2;
+    this.layers.forEach((layer, i) => {
+      const z = layer.baseZ + (i - mid) * this.explode * (n > 3 ? .28 : .5);
+      for (const m of layer.meshes) m.position.z = z;
+    });
+  }
+  setExplode(v) { this.explode = v; this.applyExplode(); }
+  // mordisco: un arco grande + dientes chicos sobre su borde
+  bite(lx, ly) {
+    const top = this.layers[this.layers.length - 1].spec.sdf;
+    const sdf = this.currentSdf(top);
+    let dx = lx, dy = ly; const l = Math.hypot(dx, dy) || 1; dx /= l; dy /= l;
+    let px = lx, py = ly;
+    for (let i = 0; i < 300 && sdf(px, py) < 0; i++) { px += dx * .01; py += dy * .01; }
+    const rb = .3 + Math.random() * .06;
+    const cx = px + dx * rb * .45, cy = py + dy * rb * .45;
+    const teeth = [[cx, cy, rb]];
+    const ang = Math.atan2(-dy, -dx);
+    for (let k = -3; k <= 3; k++) {
+      const a = ang + k * .32;
+      teeth.push([cx + Math.cos(a) * rb * .98, cy + Math.sin(a) * rb * .98, rb * (.14 + Math.random() * .05)]);
+    }
+    this.bites.push({ teeth });
+    this.rebuild();
+    return { x: px, y: py };
+  }
+  remaining() {
+    const top = this.currentSdf(this.layers[this.layers.length - 1].spec.sdf), base = this.layers[this.layers.length - 1].spec.sdf;
+    let a = 0, b = 0;
+    for (let x = -1.5; x <= 1.5; x += .05) for (let y = -1.1; y <= 1.1; y += .05) { if (base(x, y) < 0) { b++; if (top(x, y) < 0) a++; } }
+    return b ? a / b : 1;
+  }
+  resetBites() { this.bites = []; this.rebuild(); }
+}
+
+/* ================================================================
+   Escena
+   ================================================================ */
+const canvas = document.getElementById('gl');
+let renderer;
+try {
+  renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true, preserveDrawingBuffer: false });
+} catch (e) {
+  document.getElementById('err').style.display = 'block';
+  document.getElementById('loading').classList.add('off');
+  throw e;
+}
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.05;
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+
+const scene = new THREE.Scene();
+const pmrem = new THREE.PMREMGenerator(renderer);
+scene.environment = pmrem.fromScene(new RoomEnvironment(), .04).texture;
+scene.environmentIntensity = .55;
+
+const camera = new THREE.PerspectiveCamera(30, 1, .1, 100);
+camera.position.set(0, 2.3, 7.4);
+camera.lookAt(0, -.15, 0);
+
+const key = new THREE.DirectionalLight(0xfff1dc, 2.6);
+key.position.set(3.5, 6, 3.5);
+key.castShadow = true;
+key.shadow.mapSize.set(2048, 2048);
+key.shadow.camera.left = -5; key.shadow.camera.right = 5; key.shadow.camera.top = 5; key.shadow.camera.bottom = -5;
+key.shadow.radius = 6; key.shadow.bias = -.0006; key.shadow.normalBias = .02;
+scene.add(key);
+const rim = new THREE.DirectionalLight(0xffe2c0, 1.6); rim.position.set(-4, 2.5, -4); scene.add(rim);
+const fillL = new THREE.DirectionalLight(0xffffff, .5); fillL.position.set(-3, 1, 5); scene.add(fillL);
+scene.add(new THREE.HemisphereLight(0xfff6e8, 0x7a3a20, .45));
+
+const ground = new THREE.Mesh(new THREE.PlaneGeometry(40, 40), new THREE.ShadowMaterial({ opacity: .28 }));
+ground.rotation.x = -Math.PI / 2; ground.position.y = -1.15; ground.receiveShadow = true;
+scene.add(ground);
+
+/* ---------- migas ---------- */
+const CRUMBS = 260;
+const crumbMesh = new THREE.InstancedMesh(new THREE.IcosahedronGeometry(1, 0), new THREE.MeshStandardMaterial({ roughness: .9 }), CRUMBS);
+crumbMesh.castShadow = true;
+crumbMesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
+scene.add(crumbMesh);
+const crumbs = Array.from({ length: CRUMBS }, () => ({ life: 0, p: new THREE.Vector3(), v: new THREE.Vector3(), r: new THREE.Euler(), s: 0, spin: new THREE.Vector3() }));
+let crumbHead = 0;
+const dummy = new THREE.Object3D();
+for (let i = 0; i < CRUMBS; i++) { dummy.scale.setScalar(0); dummy.updateMatrix(); crumbMesh.setMatrixAt(i, dummy.matrix); crumbMesh.setColorAt(i, new THREE.Color()); }
+function emitCrumbs(world, color, n = 34) {
+  const c = C(color);
+  for (let k = 0; k < n; k++) {
+    const cr = crumbs[crumbHead]; crumbHead = (crumbHead + 1) % CRUMBS;
+    cr.life = 4 + Math.random() * 2;
+    cr.p.copy(world).add(new THREE.Vector3((Math.random() - .5) * .25, (Math.random() - .5) * .15, (Math.random() - .5) * .25));
+    cr.v.set((Math.random() - .5) * 3, 1 + Math.random() * 2.5, (Math.random() - .5) * 3 + .8);
+    cr.s = .012 + Math.random() ** 2 * .05;
+    cr.spin.set(Math.random() * 10, Math.random() * 10, Math.random() * 10);
+    crumbMesh.setColorAt((crumbHead + CRUMBS - 1) % CRUMBS, c.clone().multiplyScalar(.85 + Math.random() * .3));
+  }
+  crumbMesh.instanceColor.needsUpdate = true;
+}
+function updateCrumbs(dt) {
+  for (let i = 0; i < CRUMBS; i++) {
+    const cr = crumbs[i];
+    if (cr.life <= 0) { dummy.scale.setScalar(0); }
+    else {
+      cr.life -= dt;
+      cr.v.y -= 9.8 * dt;
+      cr.p.addScaledVector(cr.v, dt);
+      const floor = ground.position.y + cr.s;
+      if (cr.p.y < floor) { cr.p.y = floor; cr.v.y *= -.32; cr.v.x *= .7; cr.v.z *= .7; cr.spin.multiplyScalar(.6); }
+      cr.r.x += cr.spin.x * dt; cr.r.y += cr.spin.y * dt; cr.r.z += cr.spin.z * dt;
+      dummy.position.copy(cr.p); dummy.rotation.copy(cr.r);
+      dummy.scale.set(cr.s, cr.s * .7, cr.s * .85).multiplyScalar(Math.min(1, cr.life));
+    }
+    dummy.updateMatrix(); crumbMesh.setMatrixAt(i, dummy.matrix);
+  }
+  crumbMesh.instanceMatrix.needsUpdate = true;
+}
+
+/* ================================================================
+   Estado, UI e interacción
+   ================================================================ */
+const $ = id => document.getElementById(id);
+const cookies = [];
+let current = 0, mode = 'one', autoSpin = !matchMedia('(prefers-reduced-motion: reduce)').matches;
+const rot = { yaw: .5, pitch: 0, vyaw: 0, vpitch: 0 };
+let bitesCount = 0;
+
+function toast(msg) { const t = $('toast'); t.textContent = msg; t.classList.add('on'); clearTimeout(toast.t); toast.t = setTimeout(() => t.classList.remove('on'), 1400); }
+
+function setProduct(i) {
+  current = (i + PRODUCTS.length) % PRODUCTS.length;
+  const p = PRODUCTS[current];
+  $('p-idx').textContent = `${String(current + 1).padStart(2, '0')} / 06 · ${p.tag}`;
+  const h = $('p-name'); h.textContent = p.name; h.classList.toggle('script', !!p.script);
+  $('p-desc').textContent = p.desc;
+  document.documentElement.style.setProperty('--bg1', p.bg[0]);
+  document.documentElement.style.setProperty('--bg2', p.bg[1]);
+  document.documentElement.style.setProperty('--ink', p.ink);
+  document.querySelectorAll('#chips button').forEach((b, k) => b.setAttribute('aria-pressed', String(k === current)));
+  $('explode').value = cookies[current] ? cookies[current].explode : 0;
+  $('explode').disabled = PRODUCTS[current].layers.length < 2;
+  cookies.forEach((c, k) => { c.enter = k === current ? 0 : c.enter; });
+}
+
+PRODUCTS.forEach((p, i) => {
+  const b = document.createElement('button');
+  b.type = 'button'; b.textContent = p.name; b.setAttribute('aria-pressed', 'false');
+  b.addEventListener('click', () => { if (mode === 'all') toggleAll(false); setProduct(i); });
+  $('chips').appendChild(b);
+});
+
+function toggleAll(force) {
+  mode = (force ?? mode !== 'all') ? 'all' : 'one';
+  $('btn-all').setAttribute('aria-pressed', String(mode === 'all'));
+  $('btn-all').textContent = mode === 'all' ? 'Ver una' : 'Ver las 6';
+  document.querySelector('.title').style.opacity = mode === 'all' ? 0 : 1;
+  document.querySelector('.explode').style.opacity = mode === 'all' ? 0 : 1;
+}
+$('btn-all').addEventListener('click', () => toggleAll());
+$('btn-new').addEventListener('click', () => { cookies[current].resetBites(); cookies[current].enter = 0; bitesCount = 0; toast('¡Recién horneada!'); });
+$('btn-spin').addEventListener('click', () => { autoSpin = !autoSpin; $('btn-spin').setAttribute('aria-pressed', String(autoSpin)); });
+$('explode').addEventListener('input', e => cookies[current].setExplode(+e.target.value));
+addEventListener('keydown', e => {
+  if (e.target.tagName === 'INPUT') return;
+  if (e.key === 'ArrowRight') setProduct(current + 1);
+  if (e.key === 'ArrowLeft') setProduct(current - 1);
+});
+
+/* arrastrar para girar, click para morder */
+const ray = new THREE.Raycaster(), ndc = new THREE.Vector2();
+let down = null;
+canvas.addEventListener('pointerdown', e => { down = { x: e.clientX, y: e.clientY, lx: e.clientX, ly: e.clientY, moved: 0 }; canvas.setPointerCapture(e.pointerId); canvas.classList.add('dragging'); });
+canvas.addEventListener('pointermove', e => {
+  if (!down) return;
+  const dx = e.clientX - down.lx, dy = e.clientY - down.ly;
+  down.lx = e.clientX; down.ly = e.clientY; down.moved += Math.abs(dx) + Math.abs(dy);
+  rot.vyaw = dx * .012; rot.vpitch = dy * .008;
+  rot.yaw += rot.vyaw; rot.pitch = clamp(rot.pitch + rot.vpitch, -.9, .7);
+});
+canvas.addEventListener('pointerup', e => {
+  canvas.classList.remove('dragging');
+  if (down && down.moved < 6) handleClick(e);
+  down = null;
+});
+function handleClick(e) {
+  ndc.set(e.clientX / innerWidth * 2 - 1, -(e.clientY / innerHeight) * 2 + 1);
+  ray.setFromCamera(ndc, camera);
+  const targets = mode === 'all' ? cookies : [cookies[current]];
+  const hits = ray.intersectObjects(targets.map(c => c.inner), true);
+  if (!hits.length) return;
+  const ck = targets.find(c => c.inner.children.includes(hits[0].object));
+  if (mode === 'all') { toggleAll(false); setProduct(cookies.indexOf(ck)); return; }
+  const local = ck.inner.worldToLocal(hits[0].point.clone());
+  const edgePt = ck.bite(local.x, local.y);
+  const world = ck.inner.localToWorld(new THREE.Vector3(edgePt.x, edgePt.y, 0));
+  emitCrumbs(world, ck.spec.dough.edge);
+  bitesCount++;
+  const left = ck.remaining();
+  if (left < .14) {
+    toast('Te la comiste toda');
+    ck.enter = -1; // sale
+    setTimeout(() => { ck.resetBites(); ck.enter = 0; bitesCount = 0; }, 650);
+  } else toast(['¡Ñam!', 'Crunch', 'Una más y paro', 'Mmm…', 'Quedan migas'][bitesCount % 5] + ` · ${Math.round(left * 100)}%`);
+}
+
+/* ---------- tamaño ---------- */
+function resize() {
+  const w = innerWidth, h = innerHeight;
+  renderer.setSize(w, h, false);
+  camera.aspect = w / h;
+  camera.fov = w < 760 ? 40 : 30;
+  camera.updateProjectionMatrix();
+}
+addEventListener('resize', resize);
+
+/* ---------- loop ---------- */
+const clock = new THREE.Clock();
+function frame() {
+  const dt = Math.min(clock.getDelta(), 1 / 30), t = clock.elapsedTime;
+  if (!down) {
+    rot.vyaw *= .94; rot.vpitch *= .9;
+    rot.yaw += rot.vyaw + (autoSpin && mode === 'one' ? dt * .35 : 0);
+    rot.pitch *= .96;
+  }
+  const mobile = innerWidth < 760;
+  cookies.forEach((c, i) => {
+    let tx, ty, tz, s, yaw, tilt;
+    if (mode === 'one') {
+      const on = i === current;
+      c.enter = c.enter < 0 ? Math.max(-1, c.enter - dt * 3) : Math.min(1, c.enter + dt * 2.2);
+      const k = on ? (c.enter < 0 ? 1 + c.enter : 1 - Math.pow(1 - c.enter, 3)) : 0;
+      c.vis = lerp(c.vis ?? 0, on ? 1 : 0, .14);
+      tx = mobile ? 0 : .9; ty = .05 + Math.sin(t * 1.3) * .05; tz = 0;
+      s = (mobile ? .95 : 1.2) * (on ? k : c.vis * .6) * (1 + .04 * Math.sin(t * 2));
+      yaw = rot.yaw + (1 - k) * 2.5; tilt = -.95 + rot.pitch + Math.sin(t * .9) * .05;
+      c.root.visible = s > .01;
+    } else {
+      const col = i % 3, row = (i / 3) | 0;
+      tx = (col - 1) * (mobile ? 1.6 : 2.6); ty = -.25 + Math.sin(t * 1.2 + i) * .04; tz = row ? 1.1 : -1.3;
+      if (mobile) { tx = (i % 2 - .5) * 1.9; tz = (Math.floor(i / 2) - 1) * 1.6; }
+      s = mobile ? .62 : .78; yaw = t * .3 + i; tilt = -1.15; c.root.visible = true;
+    }
+    c.root.position.x = lerp(c.root.position.x, tx, .1);
+    c.root.position.y = lerp(c.root.position.y, ty, .1);
+    c.root.position.z = lerp(c.root.position.z, tz, .1);
+    const cs = lerp(c.root.scale.x, s, .16); c.root.scale.setScalar(Math.max(cs, .0001));
+    c.root.rotation.set(tilt, 0, 0);
+    c.inner.rotation.z = yaw;
+  });
+  updateCrumbs(dt);
+  renderer.render(scene, camera);
+  requestAnimationFrame(frame);
+}
+
+/* ---------- arranque ---------- */
+(async () => {
+  try { await Promise.all([document.fonts.load('400 40px Yellowtail'), document.fonts.load('900 40px "Londrina Solid"')]); } catch (e) {}
+  resize();
+  for (const p of PRODUCTS) {
+    const c = new Cookie(p);
+    c.enter = 0; c.vis = 0;
+    scene.add(c.root);
+    cookies.push(c);
+    await new Promise(r => setTimeout(r, 0));
+  }
+  setProduct(0);
+  $('loading').classList.add('off');
+  frame();
+})();
+</script>
+</body>
+</html>
