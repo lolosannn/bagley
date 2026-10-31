@@ -251,6 +251,16 @@ body.is-loading .hero-160 i, body.is-loading .hero-years, body.is-loading .hero-
 .figu .n { font-weight: 900; font-size: 13px; color: var(--rojo); }
 .figu .art { border-radius: 12px; background: var(--c); display: grid; place-items: center; font-family: var(--f-display); font-weight: 900; font-size: clamp(56px, 6vw, 84px); color: var(--blanco); text-shadow: 0 4px 0 rgba(0,0,0,.15); }
 .figu .art.sm { font-size: clamp(34px, 3.4vw, 48px); }
+/* figuritas con ilustración: la imagen llena el recuadro y el año va como etiqueta */
+.figu .art.photo { position: relative; overflow: hidden; background: var(--c); min-height: 0; }
+.figu .art.photo img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transition: transform .6s var(--ease-pop); }
+.figu:hover .art.photo img { transform: scale(1.06); }
+.figu .art.photo em {
+  position: absolute; left: 8px; bottom: 8px; font-style: normal; font-size: clamp(30px, 3vw, 42px); line-height: 1;
+  padding: 4px 12px 6px; border-radius: 10px; background: var(--c); color: var(--blanco);
+  box-shadow: 0 0 0 3px var(--blanco), 0 6px 14px rgba(0,0,0,.25); text-shadow: none;
+}
+.figu .art.sm.photo em { font-size: clamp(22px, 2.2vw, 30px); }
 .figu .front b { font-family: var(--f-display); font-size: 26px; color: var(--rojo); line-height: 1; margin-top: 8px; }
 .figu .front small { font-weight: 800; font-size: 13px; }
 .figu .back { transform: rotateY(180deg); align-content: center; gap: 12px; font-size: 15px; font-weight: 700; background: var(--c); color: var(--blanco); }
