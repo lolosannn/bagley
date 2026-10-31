@@ -189,16 +189,28 @@ button { font: inherit; color: inherit; }
 .section-head h2 { font-size: clamp(54px, 8vw, 120px); color: var(--amarillo); margin-top: 12px; text-shadow: 0 6px 0 var(--rojo-hondo); }
 .section-head h2 span { color: var(--blanco); font-family: var(--f-script); font-weight: 400; font-size: .6em; text-shadow: none; }
 .scene { height: 270vh; position: relative; }
-.stick { position: sticky; top: 0; height: 100vh; overflow: hidden; display: grid; grid-template-columns: .9fr 1.1fr; align-items: center; gap: 2vw; padding: 0 5vw; background: var(--bg); color: var(--ink); }
+.stick { position: sticky; top: 0; height: 100vh; overflow: hidden; display: grid; grid-template-columns: 1fr 1fr; align-items: center; gap: 2vw; padding: 0 5vw; background: var(--bg); color: var(--ink); }
 .scene .big { position: absolute; left: 0; right: 0; bottom: -4vw; text-align: center; pointer-events: none; font-family: var(--f-display); font-weight: 900; font-size: 26vw; line-height: .8; color: var(--ghost); white-space: nowrap; }
-.copy { position: relative; z-index: 2; display: grid; gap: 14px; max-width: 34rem; }
+.copy { position: relative; z-index: 2; display: grid; gap: 14px; max-width: 42rem; width: 100%; }
 .copy .tag { font-weight: 900; font-size: 13px; letter-spacing: 2px; text-transform: uppercase; }
 .copy h3 { font-family: var(--f-script); font-weight: 400; font-size: clamp(70px, 9vw, 140px); line-height: .9; color: var(--title); text-shadow: 0 4px 0 var(--shadow); }
 .copy p { font-size: 18px; font-weight: 600; max-width: 40ch; }
-.meter { display: grid; grid-template-columns: 104px 1fr 44px; gap: 12px; align-items: center; font-weight: 900; font-size: 12px; letter-spacing: 1.5px; text-transform: uppercase; }
-.meter i { height: 10px; border-radius: 99px; background: rgba(0,0,0,.15); overflow: hidden; display: block; }
-.meter i b { display: block; height: 100%; width: 0; background: var(--ink); border-radius: 99px; }
-.meter span { font-variant-numeric: tabular-nums; text-align: right; }
+/* medidores: etiqueta y número grandes arriba, barra gruesa a todo el ancho */
+.meter {
+  display: grid; grid-template-columns: 1fr auto; align-items: end; column-gap: 12px; row-gap: 8px;
+  font-weight: 900; font-size: 15px; letter-spacing: 2px; text-transform: uppercase;
+}
+.meter + .meter { margin-top: 6px; }
+.meter span { order: 2; font-family: var(--f-display); font-size: clamp(34px, 3.4vw, 48px); line-height: .8; letter-spacing: 0; font-variant-numeric: tabular-nums; color: var(--title); text-shadow: 0 3px 0 var(--shadow); }
+.meter i {
+  order: 3; grid-column: 1 / -1; display: block; height: 26px; border-radius: 99px; overflow: hidden;
+  background: rgba(0,0,0,.14); box-shadow: inset 0 3px 0 rgba(0,0,0,.12);
+}
+.meter i b {
+  display: block; height: 100%; width: 0; border-radius: 99px;
+  background: repeating-linear-gradient(-45deg, var(--ink) 0 12px, color-mix(in srgb, var(--ink) 82%, transparent) 12px 24px);
+  box-shadow: inset 0 -4px 0 rgba(0,0,0,.18), inset 0 4px 0 rgba(255,255,255,.18);
+}
 .stage { position: relative; z-index: 1; width: min(84vh, 100%); aspect-ratio: 1; justify-self: center; }
 .stage img { position: absolute; display: block; will-change: transform; user-select: none; -webkit-user-drag: none; pointer-events: none; }
 .stage img.piece { filter: drop-shadow(0 26px 22px rgba(40, 10, 0, .28)); }
@@ -288,7 +300,8 @@ button { font: inherit; color: inherit; }
   .stick { grid-template-columns: 1fr; grid-template-rows: auto 1fr; padding: 90px 22px 30px; align-items: start; gap: 10px; }
   .copy p { font-size: 16px; }
   .copy h3 { font-size: 76px; }
-  .meter { grid-template-columns: 96px 1fr 40px; }
+  .meter { font-size: 13px; }
+  .meter i { height: 18px; }
   .stage { width: min(92vw, 48vh); align-self: center; }
   .album-stick { padding-top: 12vh; }
 }
