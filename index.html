@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bagley · 160 años rellenos de sabor</title>
+<meta name="description" content="Concepto web interactivo para Bagley: galletitas en 3D, galletitas que se parten con el scroll, juego de mojar y tu propio Surtido. Proyecto de portfolio no oficial.">
+<meta name="theme-color" content="#E3202A">
+<meta property="og:title" content="Bagley · 160 años rellenos de sabor">
+<meta property="og:description" content="Concepto web interactivo. Proyecto de portfolio de Avanth Studio, no oficial.">
+<link rel="icon" type="image/svg+xml" href="assets/logo.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Londrina+Solid:wght@300;400;900&family=Nunito:wght@400;600;700;800;900&family=Yellowtail&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/styles.css">
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"
+} }
+</script>
+<script src="https://cdn.jsdelivr.net/npm/lenis@1.1.13/dist/lenis.min.js" defer></script>
+<script type="module" src="js/main.js"></script>
+</head>
+<body class="is-loading">
+
+<!-- ============ LOADER: el logo-libro se abre ============ -->
+<div id="loader" aria-hidden="true">
+  <div class="loader-book">
+    <div class="page left"><span>Horneando</span></div>
+    <div class="page right"><span id="loader-year">1864</span></div>
+    <div class="cover">
+      <svg viewBox="0 0 240 170"><use href="#logo-book"/></svg>
+    </div>
+  </div>
+  <div class="loader-bar"><i id="loader-bar"></i></div>
+</div>
+
+<!-- símbolo del logo, reutilizado en toda la página -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <g id="logo-book">
+      <path d="M16 44 C56 22 96 22 120 38 C144 22 184 22 224 44 L218 150 C184 134 150 136 120 156 C90 136 56 134 22 150 Z" fill="#8E0E14" stroke="#FFD200" stroke-width="6" stroke-linejoin="round" transform="translate(0 6)"/>
+      <path d="M16 36 C56 14 96 14 120 30 C144 14 184 14 224 36 L218 142 C184 126 150 128 120 148 C90 128 56 126 22 142 Z" fill="#E3202A" stroke="#FFD200" stroke-width="6" stroke-linejoin="round"/>
+      <path d="M26 44 C60 26 96 26 120 40 C144 26 180 26 214 44" fill="none" stroke="#F0464E" stroke-width="3" opacity=".7"/>
+      <text x="122" y="104" text-anchor="middle" font-family="Yellowtail, cursive" font-size="66" fill="#FFFFFF" transform="rotate(-7 122 96)">Bagley</text>
+      <path d="M86 118 C120 112 160 104 196 84" fill="none" stroke="#FFFFFF" stroke-width="4.5" stroke-linecap="round" transform="rotate(-7 122 96)"/>
+    </g>
+  </defs>
+</svg>
+
+<div id="cursor" aria-hidden="true"><span></span></div>
+<canvas id="rain" aria-hidden="true"></canvas>
+
+<!-- ============ NAV ============ -->
+<header class="nav" id="nav">
+  <a href="#inicio" class="nav-logo" aria-label="Bagley, ir al inicio"><svg viewBox="0 0 240 170"><use href="#logo-book"/></svg></a>
+  <nav aria-label="Secciones">
+    <ul class="nav-links">
+      <li><a href="#galletitas">Galletitas</a></li>
+      <li><a href="#historia">Historia</a></li>
+      <li><a href="#mojar">Jugar</a></li>
+    </ul>
+  </nav>
+  <div class="nav-actions">
+    <button class="sound" id="sound" type="button" aria-pressed="false" aria-label="Activar sonido" data-cursor="Sonido">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9h4l5-4v14l-5-4H4z" fill="currentColor"/><path class="waves" d="M16 9c1.5 1.5 1.5 4.5 0 6M18.5 6.5c3 3 3 8 0 11" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+    </button>
+    <a href="#surtido" class="btn btn-white" data-magnet>Armá tu Surtido</a>
+  </div>
+</header>
+
+<main>
+  <!-- ============ HERO ============ -->
+  <section id="inicio" class="hero" data-theme="rojo">
+    <div class="bunting top" data-bunting></div>
+    <canvas id="hero-gl" data-cursor="Mordé"></canvas>
+    <div class="hero-copy">
+      <p class="kicker">Desde 1864 · Buenos Aires</p>
+      <h1 class="hero-title" aria-label="160 años rellenos de sabor">
+        <span class="hero-160" aria-hidden="true"><i>1</i><i>6</i><i>0</i></span>
+        <span class="hero-years" aria-hidden="true">años</span>
+        <span class="hero-script" aria-hidden="true">rellenos de sabor</span>
+      </h1>
+    </div>
+    <p class="hero-hint"><b>Tocá la Rumba.</b> Dale, nadie te ve.<span id="bite-count"></span></p>
+    <a href="#manifiesto" class="scroll-cue" aria-label="Bajar"><span></span></a>
+  </section>
+
+  <!-- ============ MANIFIESTO ============ -->
+  <section id="manifiesto" class="manifesto" data-theme="amarillo">
+    <div class="wrap">
+      <p class="mani-text" id="mani-text">Estuvimos en tu primer recreo, en la merienda de la abuela, en la noche antes del final y en cada cumpleaños donde alguien abrió un paquete de galletitas para compartir. Hace 160 años que horneamos costumbres.</p>
+      <div class="stats">
+        <div class="stat"><b data-count="1864">1864</b><span>el año en que empezó todo</span></div>
+        <div class="stat"><b data-count="160">160</b><span>años de meriendas</span></div>
+        <div class="stat"><b data-count="3">3</b><span>protagonistas en esta web</span></div>
+        <div class="stat"><b>∞</b><span>mates que las acompañaron</span></div>
+      </div>
+    </div>
+    <span class="sticker s-rumba" data-pop>Rumba</span>
+    <span class="sticker s-merengadas" data-pop>Merengadas</span>
+    <span class="sticker s-mellizas" data-pop>Mellizas</span>
+  </section>
+
+  <!-- ============ GALLETITERA: fotos que se parten ============ -->
+  <section id="galletitas" class="galletitas">
+    <header class="section-head wrap">
+      <p class="kicker">La galletitera</p>
+      <h2>Tres protagonistas.<br><span>Bajá y escuchá el crack.</span></h2>
+    </header>
+
+    <article class="scene rumba" data-cookie="rumba" aria-label="Rumba">
+      <div class="stick">
+        <div class="big" aria-hidden="true">CRACK</div>
+        <div class="copy">
+          <span class="tag">01 / 03 · La del recreo</span>
+          <h3>Rumba</h3>
+          <p>Dos tapitas sabor chocolate, festoneadas, con su personaje en relieve y un relleno sabor coco que se asoma por los agujeritos.</p>
+          <div class="meter" data-v="78">Crocancia<i><b></b></i><span>0%</span></div>
+          <div class="meter" data-v="85">Relleno<i><b></b></i><span>0%</span></div>
+          <div class="meter" data-v="64">Mojabilidad<i><b></b></i><span>0%</span></div>
+        </div>
+        <div class="stage" role="img" aria-label="Rumba que se parte en pedazos"></div>
+      </div>
+    </article>
+
+    <article class="scene merengadas" data-cookie="merengadas" aria-label="Merengadas">
+      <div class="stick">
+        <div class="big" aria-hidden="true">ÑAM</div>
+        <div class="copy">
+          <span class="tag">02 / 03 · La del merengue rosa</span>
+          <h3>Merengadas</h3>
+          <p>Dos galletitas doradas y una nube de merengue rosa en el medio. Cuando se parte, el merengue se estira y no quiere soltar.</p>
+          <div class="meter" data-v="55">Crocancia<i><b></b></i><span>0%</span></div>
+          <div class="meter" data-v="96">Merengue<i><b></b></i><span>0%</span></div>
+          <div class="meter" data-v="40">Mojabilidad<i><b></b></i><span>0%</span></div>
+        </div>
+        <div class="stage" role="img" aria-label="Merengadas que se parte en pedazos"></div>
+      </div>
+    </article>
+
+    <article class="scene mellizas" data-cookie="mellizas" aria-label="Mellizas">
+      <div class="stick">
+        <div class="big" aria-hidden="true">CRUNCH</div>
+        <div class="copy">
+          <span class="tag">03 / 03 · Las inseparables</span>
+          <h3>Mellizas</h3>
+          <p>Dos tapitas doradas unidas por crema blanca. Se parten en tres y siguen siendo mellizas.</p>
+          <div class="meter" data-v="72">Crocancia<i><b></b></i><span>0%</span></div>
+          <div class="meter" data-v="80">Crema<i><b></b></i><span>0%</span></div>
+          <div class="meter" data-v="82">Mojabilidad<i><b></b></i><span>0%</span></div>
+        </div>
+        <div class="stage" role="img" aria-label="Mellizas que se parte en pedazos"></div>
+      </div>
+    </article>
+  </section>
+
+  <!-- ============ HISTORIA: álbum de figuritas ============ -->
+  <section id="historia" class="album" data-theme="crema">
+    <div class="album-stick">
+      <header class="album-head">
+        <p class="kicker">Álbum oficial 1864 – 2024</p>
+        <h2>La historia, en figuritas</h2>
+        <p class="album-progress" aria-live="polite"><span id="album-count">0</span> de 6 pegadas <i><b id="album-bar"></b></i></p>
+      </header>
+      <div class="album-track" id="album-track">
+        <button class="figu" type="button" data-cursor="Pegala" style="--c:#E3202A">
+          <span class="figu-inner">
+            <span class="front"><span class="n">01</span><span class="art">1864</span><b>La Hesperidina</b><small>Un yanqui en Buenos Aires</small></span>
+            <span class="back"><b>1864</b>Melville Sewell Bagley, un joven de Maine, se instala en Buenos Aires y crea la Hesperidina, un aperitivo de cáscaras de naranja amarga. Ahí arranca la historia de la marca.</span>
+          </span>
+        </button>
+        <button class="figu" type="button" data-cursor="Pegala" style="--c:#1B9DD9">
+          <span class="figu-inner">
+            <span class="front"><span class="n">02</span><span class="art">1875</span><b>Las primeras galletitas</b><small>Nace una costumbre</small></span>
+            <span class="back"><b>1875</b>Bagley empieza a hornear galletitas. Lo que era un producto nuevo se vuelve parte de la mesa de todos los días.</span>
+          </span>
+        </button>
+        <button class="figu" type="button" data-cursor="Pegala" style="--c:#5DBB46">
+          <span class="figu-inner">
+            <span class="front"><span class="n">03</span><span class="art sm">Barracas</span><b>La fábrica</b><small>Olor a horno en el barrio</small></span>
+            <span class="back"><b>Barracas</b>Durante décadas, la fábrica de Barracas perfumó el barrio con olor a galletitas recién horneadas.</span>
+          </span>
+        </button>
+        <button class="figu" type="button" data-cursor="Pegala" style="--c:#6B3A1F">
+          <span class="figu-inner">
+            <span class="front"><span class="n">04</span><span class="art sm">Recreo</span><b>La Rumba en la mochila</b><small>Generaciones de recreos</small></span>
+            <span class="back"><b>Recreo</b>El paquete que se abre en el patio y se reparte entre todos. Siempre hay alguien que se come primero el relleno.</span>
+          </span>
+        </button>
+        <button class="figu" type="button" data-cursor="Pegala" style="--c:#F27FB2">
+          <span class="figu-inner">
+            <span class="front"><span class="n">05</span><span class="art">2005</span><b>Nueva familia</b><small>Bagley y Arcor</small></span>
+            <span class="back"><b>2005</b>Bagley se suma a la familia Arcor y sus galletitas siguen llegando a todo el país.</span>
+          </span>
+        </button>
+        <button class="figu gold" type="button" data-cursor="Pegala" style="--c:#FFD200">
+          <span class="figu-inner">
+            <span class="front"><span class="n">06</span><span class="art">160</span><b>La difícil</b><small>Figurita dorada</small></span>
+            <span class="back"><b>2024</b>160 años rellenos de sabor. Y esta web, que es la fiesta.</span>
+          </span>
+        </button>
+      </div>
+      <p class="album-hint">Tocá cada figurita para darla vuelta y pegarla.</p>
+    </div>
+  </section>
+
+  <!-- ============ JUEGO: mojar la galletita ============ -->
+  <section id="mojar" class="dunk" data-theme="azul">
+    <div class="wrap dunk-grid">
+      <div class="dunk-copy">
+        <p class="kicker">Juego</p>
+        <h2>El arte de mojar</h2>
+        <p>Agarrá la galletita, metela en la taza y sacala antes de que se parta. Cuanto más mojada sin romperse, mejor puntaje.</p>
+        <div class="chip-row" role="group" aria-label="Galletita">
+          <button type="button" class="chip" data-dunk-cookie="rumba" aria-pressed="true">Rumba</button>
+          <button type="button" class="chip" data-dunk-cookie="merengadas" aria-pressed="false">Merengadas</button>
+          <button type="button" class="chip" data-dunk-cookie="mellizas" aria-pressed="false">Mellizas</button>
+        </div>
+        <div class="chip-row" role="group" aria-label="Para mojar">
+          <button type="button" class="chip" data-dunk-liquid="leche" aria-pressed="true">Leche</button>
+          <button type="button" class="chip" data-dunk-liquid="cafe" aria-pressed="false">Café con leche</button>
+          <button type="button" class="chip" data-dunk-liquid="mate" aria-pressed="false">Mate cocido</button>
+        </div>
+        <div class="dunk-score">
+          <div class="gauge"><i id="dunk-gauge"></i></div>
+          <p><b id="dunk-pct">0%</b> <span id="dunk-msg">Agarrala y mojala.</span></p>
+          <p class="best">Tu récord: <b id="dunk-best">0%</b></p>
+        </div>
+      </div>
+      <div class="dunk-stage">
+        <canvas id="dunk-canvas" data-cursor="Mojá" aria-label="Juego: arrastrá la galletita hasta la taza"></canvas>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ SURTIDO: personalizador ============ -->
+  <section id="surtido" class="surtido" data-theme="crema">
+    <div class="wrap surtido-grid">
+      <div class="bag-stage" id="bag-stage">
+        <canvas id="bag-canvas" width="1000" height="1250" data-cursor="Sacudilo" aria-label="Vista previa de tu paquete de Surtido"></canvas>
+      </div>
+      <form class="surtido-form" id="surtido-form">
+        <p class="kicker">Personalizá</p>
+        <h2>Armá tu Surtido</h2>
+        <p>Tu nombre, tus galletitas, tu estampado. Lo bajás como imagen para compartir.</p>
+        <label for="bag-name">Tu nombre</label>
+        <input id="bag-name" name="name" maxlength="16" value="Lorenzo" autocomplete="off">
+        <fieldset>
+          <legend>Qué lleva</legend>
+          <label class="check"><input type="checkbox" id="bag-c-rumba" name="cookies" value="rumba" checked> Rumba</label>
+          <label class="check"><input type="checkbox" id="bag-c-merengadas" name="cookies" value="merengadas" checked> Merengadas</label>
+          <label class="check"><input type="checkbox" id="bag-c-mellizas" name="cookies" value="mellizas" checked> Mellizas</label>
+        </fieldset>
+        <fieldset>
+          <legend>Color</legend>
+          <div class="swatches">
+            <label><input type="radio" id="bag-col-1" name="color" value="#FFD200" checked><i style="background:#FFD200"></i><span class="sr">Amarillo</span></label>
+            <label><input type="radio" id="bag-col-2" name="color" value="#E3202A"><i style="background:#E3202A"></i><span class="sr">Rojo</span></label>
+            <label><input type="radio" id="bag-col-3" name="color" value="#3FA9E0"><i style="background:#3FA9E0"></i><span class="sr">Celeste</span></label>
+            <label><input type="radio" id="bag-col-4" name="color" value="#F27FB2"><i style="background:#F27FB2"></i><span class="sr">Rosa</span></label>
+            <label><input type="radio" id="bag-col-5" name="color" value="#5DBB46"><i style="background:#5DBB46"></i><span class="sr">Verde</span></label>
+          </div>
+        </fieldset>
+        <fieldset>
+          <legend>Estampado</legend>
+          <div class="chip-row">
+            <label class="chip-radio"><input type="radio" id="bag-p-1" name="pattern" value="confetti" checked><span>Confetti</span></label>
+            <label class="chip-radio"><input type="radio" id="bag-p-2" name="pattern" value="globos"><span>Globos</span></label>
+            <label class="chip-radio"><input type="radio" id="bag-p-3" name="pattern" value="banderines"><span>Banderines</span></label>
+            <label class="chip-radio"><input type="radio" id="bag-p-4" name="pattern" value="liso"><span>Liso</span></label>
+          </div>
+        </fieldset>
+        <div class="form-actions">
+          <button type="button" class="btn btn-red" id="bag-download" data-magnet>Descargar PNG</button>
+          <button type="button" class="btn btn-outline" id="bag-random">Al azar</button>
+        </div>
+      </form>
+    </div>
+  </section>
+</main>
+
+<!-- ============ FOOTER: piñata ============ -->
+<footer id="pinata" class="pinata" data-theme="rojo">
+  <div class="bunting top" data-bunting></div>
+  <canvas id="pinata-canvas" data-cursor="Rompé" aria-hidden="true"></canvas>
+  <div class="pinata-copy">
+    <h2>¿Quedó alguna en el paquete?</h2>
+    <button type="button" class="btn btn-white" id="pinata-btn" data-magnet>Romper la piñata</button>
+  </div>
+  <div class="foot-word" aria-hidden="true">Bagley</div>
+  <div class="foot-info wrap">
+    <p>Proyecto conceptual de portfolio. No es un sitio oficial ni está afiliado a Bagley; las marcas pertenecen a sus titulares. Imágenes de galletitas generadas con IA.</p>
+    <p>Diseño y desarrollo: <a href="https://avanth.com.ar">Avanth Studio</a> · Pssst: escribí “rumba”.</p>
+  </div>
+</footer>
+</body>
+</html>

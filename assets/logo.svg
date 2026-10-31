@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 170">
+  <path d="M16 44 C56 22 96 22 120 38 C144 22 184 22 224 44 L218 150 C184 134 150 136 120 156 C90 136 56 134 22 150 Z" fill="#8E0E14" stroke="#FFD200" stroke-width="6" stroke-linejoin="round" transform="translate(0 6)"/>
+  <path d="M16 36 C56 14 96 14 120 30 C144 14 184 14 224 36 L218 142 C184 126 150 128 120 148 C90 128 56 126 22 142 Z" fill="#E3202A" stroke="#FFD200" stroke-width="6" stroke-linejoin="round"/>
+  <text x="122" y="104" text-anchor="middle" font-family="Yellowtail, Brush Script MT, cursive" font-size="66" fill="#FFFFFF" transform="rotate(-7 122 96)">Bagley</text>
+</svg>

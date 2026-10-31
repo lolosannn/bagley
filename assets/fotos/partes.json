@@ -1,0 +1,368 @@
+{
+ "mellizas": [
+  {
+   "file": "mellizas-00.webp",
+   "kind": "piece",
+   "x": 0.0895,
+   "y": 0.334,
+   "w": 0.319,
+   "h": 0.404,
+   "area": 355444
+  },
+  {
+   "file": "mellizas-01.webp",
+   "kind": "piece",
+   "x": 0.5945,
+   "y": 0.298,
+   "w": 0.331,
+   "h": 0.3575,
+   "area": 314240
+  },
+  {
+   "file": "mellizas-02.webp",
+   "kind": "piece",
+   "x": 0.398,
+   "y": 0.297,
+   "w": 0.2505,
+   "h": 0.371,
+   "area": 229518
+  },
+  {
+   "file": "mellizas-03.webp",
+   "kind": "crumb",
+   "x": 0.3915,
+   "y": 0.5325,
+   "w": 0.032,
+   "h": 0.0335,
+   "area": 1741
+  },
+  {
+   "file": "mellizas-04.webp",
+   "kind": "crumb",
+   "x": 0.651,
+   "y": 0.676,
+   "w": 0.029,
+   "h": 0.0295,
+   "area": 1386
+  },
+  {
+   "file": "mellizas-05.webp",
+   "kind": "crumb",
+   "x": 0.6385,
+   "y": 0.619,
+   "w": 0.0245,
+   "h": 0.0275,
+   "area": 1207
+  },
+  {
+   "file": "mellizas-06.webp",
+   "kind": "crumb",
+   "x": 0.3685,
+   "y": 0.499,
+   "w": 0.0285,
+   "h": 0.0255,
+   "area": 1129
+  },
+  {
+   "file": "mellizas-07.webp",
+   "kind": "crumb",
+   "x": 0.5985,
+   "y": 0.4525,
+   "w": 0.0205,
+   "h": 0.032,
+   "area": 959
+  },
+  {
+   "file": "mellizas-08.webp",
+   "kind": "crumb",
+   "x": 0.6455,
+   "y": 0.263,
+   "w": 0.025,
+   "h": 0.0235,
+   "area": 884
+  },
+  {
+   "file": "mellizas-09.webp",
+   "kind": "crumb",
+   "x": 0.6185,
+   "y": 0.5165,
+   "w": 0.021,
+   "h": 0.024,
+   "area": 625
+  },
+  {
+   "file": "mellizas-10.webp",
+   "kind": "crumb",
+   "x": 0.3765,
+   "y": 0.6015,
+   "w": 0.02,
+   "h": 0.02,
+   "area": 568
+  },
+  {
+   "file": "mellizas-11.webp",
+   "kind": "crumb",
+   "x": 0.5775,
+   "y": 0.407,
+   "w": 0.022,
+   "h": 0.0185,
+   "area": 551
+  },
+  {
+   "file": "mellizas-12.webp",
+   "kind": "crumb",
+   "x": 0.382,
+   "y": 0.368,
+   "w": 0.0215,
+   "h": 0.019,
+   "area": 548
+  },
+  {
+   "file": "mellizas-13.webp",
+   "kind": "crumb",
+   "x": 0.612,
+   "y": 0.6605,
+   "w": 0.0165,
+   "h": 0.022,
+   "area": 441
+  },
+  {
+   "file": "mellizas-14.webp",
+   "kind": "crumb",
+   "x": 0.624,
+   "y": 0.6335,
+   "w": 0.0185,
+   "h": 0.0175,
+   "area": 402
+  },
+  {
+   "file": "mellizas-15.webp",
+   "kind": "crumb",
+   "x": 0.676,
+   "y": 0.6635,
+   "w": 0.0165,
+   "h": 0.017,
+   "area": 362
+  },
+  {
+   "file": "mellizas-16.webp",
+   "kind": "crumb",
+   "x": 0.5595,
+   "y": 0.3715,
+   "w": 0.018,
+   "h": 0.0165,
+   "area": 353
+  },
+  {
+   "file": "mellizas-17.webp",
+   "kind": "crumb",
+   "x": 0.5795,
+   "y": 0.4295,
+   "w": 0.0165,
+   "h": 0.0175,
+   "area": 335
+  },
+  {
+   "file": "mellizas-18.webp",
+   "kind": "crumb",
+   "x": 0.567,
+   "y": 0.3895,
+   "w": 0.0135,
+   "h": 0.0115,
+   "area": 122
+  }
+ ],
+ "merengadas": [
+  {
+   "file": "merengadas-00.webp",
+   "kind": "piece",
+   "x": 0.163,
+   "y": 0.2065,
+   "w": 0.306,
+   "h": 0.43,
+   "area": 330933
+  },
+  {
+   "file": "merengadas-01.webp",
+   "kind": "piece",
+   "x": 0.4905,
+   "y": 0.194,
+   "w": 0.3475,
+   "h": 0.3935,
+   "area": 322742
+  },
+  {
+   "file": "merengadas-02.webp",
+   "kind": "piece",
+   "x": 0.333,
+   "y": 0.5025,
+   "w": 0.373,
+   "h": 0.321,
+   "area": 291942
+  },
+  {
+   "file": "merengadas-03.webp",
+   "kind": "crumb",
+   "x": 0.5165,
+   "y": 0.433,
+   "w": 0.0505,
+   "h": 0.057,
+   "area": 5479
+  },
+  {
+   "file": "merengadas-04.webp",
+   "kind": "crumb",
+   "x": 0.4355,
+   "y": 0.444,
+   "w": 0.037,
+   "h": 0.0335,
+   "area": 2133
+  },
+  {
+   "file": "merengadas-05.webp",
+   "kind": "crumb",
+   "x": 0.6625,
+   "y": 0.5695,
+   "w": 0.027,
+   "h": 0.0275,
+   "area": 1270
+  },
+  {
+   "file": "merengadas-06.webp",
+   "kind": "crumb",
+   "x": 0.48,
+   "y": 0.427,
+   "w": 0.0235,
+   "h": 0.0235,
+   "area": 584
+  },
+  {
+   "file": "merengadas-07.webp",
+   "kind": "crumb",
+   "x": 0.554,
+   "y": 0.162,
+   "w": 0.0205,
+   "h": 0.0185,
+   "area": 411
+  },
+  {
+   "file": "merengadas-08.webp",
+   "kind": "crumb",
+   "x": 0.46,
+   "y": 0.279,
+   "w": 0.017,
+   "h": 0.014,
+   "area": 275
+  },
+  {
+   "file": "merengadas-09.webp",
+   "kind": "crumb",
+   "x": 0.4065,
+   "y": 0.573,
+   "w": 0.0175,
+   "h": 0.0155,
+   "area": 248
+  },
+  {
+   "file": "merengadas-10.webp",
+   "kind": "crumb",
+   "x": 0.6155,
+   "y": 0.497,
+   "w": 0.0125,
+   "h": 0.0165,
+   "area": 189
+  }
+ ],
+ "rumba": [
+  {
+   "file": "rumba-00.webp",
+   "kind": "piece",
+   "x": 0.15,
+   "y": 0.2695,
+   "w": 0.3515,
+   "h": 0.4125,
+   "area": 380188
+  },
+  {
+   "file": "rumba-01.webp",
+   "kind": "piece",
+   "x": 0.5365,
+   "y": 0.2655,
+   "w": 0.299,
+   "h": 0.3515,
+   "area": 288556
+  },
+  {
+   "file": "rumba-02.webp",
+   "kind": "piece",
+   "x": 0.4145,
+   "y": 0.497,
+   "w": 0.265,
+   "h": 0.3225,
+   "area": 197274
+  },
+  {
+   "file": "rumba-03.webp",
+   "kind": "crumb",
+   "x": 0.3905,
+   "y": 0.6435,
+   "w": 0.0305,
+   "h": 0.0245,
+   "area": 1104
+  },
+  {
+   "file": "rumba-04.webp",
+   "kind": "crumb",
+   "x": 0.4475,
+   "y": 0.23,
+   "w": 0.023,
+   "h": 0.023,
+   "area": 731
+  },
+  {
+   "file": "rumba-05.webp",
+   "kind": "crumb",
+   "x": 0.664,
+   "y": 0.6135,
+   "w": 0.018,
+   "h": 0.0185,
+   "area": 395
+  },
+  {
+   "file": "rumba-06.webp",
+   "kind": "crumb",
+   "x": 0.49,
+   "y": 0.415,
+   "w": 0.0215,
+   "h": 0.018,
+   "area": 335
+  },
+  {
+   "file": "rumba-07.webp",
+   "kind": "crumb",
+   "x": 0.471,
+   "y": 0.515,
+   "w": 0.012,
+   "h": 0.0145,
+   "area": 151
+  },
+  {
+   "file": "rumba-08.webp",
+   "kind": "crumb",
+   "x": 0.3575,
+   "y": 0.7035,
+   "w": 0.0115,
+   "h": 0.0155,
+   "area": 117
+  },
+  {
+   "file": "rumba-09.webp",
+   "kind": "crumb",
+   "x": 0.3305,
+   "y": 0.6805,
+   "w": 0.0105,
+   "h": 0.012,
+   "area": 68
+  }
+ ]
+}
