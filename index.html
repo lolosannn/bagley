@@ -4,11 +4,11 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Bagley · 160 años rellenos de sabor</title>
-<meta name="description" content="Concepto web interactivo para Bagley: galletitas en 3D, galletitas que se parten con el scroll, álbum de figuritas y una piñata. Proyecto de portfolio no oficial.">
+<meta name="description" content="Concepto web interactivo para Bagley: galletitas que llenan la pantalla, galletitas que se parten con el scroll, álbum de figuritas y una piñata. Proyecto de portfolio no oficial.">
 <meta name="theme-color" content="#E3202A">
 <meta property="og:title" content="Bagley · 160 años rellenos de sabor">
 <meta property="og:description" content="Concepto web interactivo. Proyecto de portfolio de Avanth Studio, no oficial.">
-<link rel="icon" type="image/svg+xml" href="assets/logo.svg">
+<link rel="icon" type="image/png" href="assets/logo-bagley.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Londrina+Solid:wght@300;400;900&family=Nunito:wght@400;600;700;800;900&family=Yellowtail&display=swap" rel="stylesheet">
@@ -16,39 +16,14 @@
 <script src="https://cdn.jsdelivr.net/npm/lenis@1.1.13/dist/lenis.min.js" defer></script>
 <script type="module" src="js/main.js"></script>
 </head>
-<body class="is-loading">
-
-<!-- ============ LOADER: el logo-libro se abre ============ -->
-<div id="loader" aria-hidden="true">
-  <div class="loader-book">
-    <div class="page left"><span>Horneando</span></div>
-    <div class="page right"><span id="loader-year">1864</span></div>
-    <div class="cover">
-      <svg viewBox="0 0 240 170"><use href="#logo-book"/></svg>
-    </div>
-  </div>
-  <div class="loader-bar"><i id="loader-bar"></i></div>
-</div>
-
-<!-- símbolo del logo, reutilizado en toda la página -->
-<svg width="0" height="0" style="position:absolute" aria-hidden="true">
-  <defs>
-    <g id="logo-book">
-      <path d="M16 44 C56 22 96 22 120 38 C144 22 184 22 224 44 L218 150 C184 134 150 136 120 156 C90 136 56 134 22 150 Z" fill="#8E0E14" stroke="#FFD200" stroke-width="6" stroke-linejoin="round" transform="translate(0 6)"/>
-      <path d="M16 36 C56 14 96 14 120 30 C144 14 184 14 224 36 L218 142 C184 126 150 128 120 148 C90 128 56 126 22 142 Z" fill="#E3202A" stroke="#FFD200" stroke-width="6" stroke-linejoin="round"/>
-      <path d="M26 44 C60 26 96 26 120 40 C144 26 180 26 214 44" fill="none" stroke="#F0464E" stroke-width="3" opacity=".7"/>
-      <text x="122" y="104" text-anchor="middle" font-family="Yellowtail, cursive" font-size="66" fill="#FFFFFF" transform="rotate(-7 122 96)">Bagley</text>
-      <path d="M86 118 C120 112 160 104 196 84" fill="none" stroke="#FFFFFF" stroke-width="4.5" stroke-linecap="round" transform="rotate(-7 122 96)"/>
-    </g>
-  </defs>
-</svg>
+<body>
 
 <div id="cursor" aria-hidden="true"><span></span></div>
 <canvas id="rain" aria-hidden="true"></canvas>
 
 <!-- ============ NAV ============ -->
 <header class="nav" id="nav">
-  <a href="#inicio" class="nav-logo" aria-label="Bagley, ir al inicio"><svg viewBox="0 0 240 170"><use href="#logo-book"/></svg></a>
+  <a href="#inicio" class="nav-logo" aria-label="Bagley, ir al inicio"><img src="assets/logo-bagley.png" alt="Bagley" width="248" height="157"></a>
   <nav aria-label="Secciones">
     <ul class="nav-links">
       <li><a href="#galletitas">Galletitas</a></li>
@@ -68,13 +43,19 @@
   <section id="inicio" class="hero" data-theme="rojo">
     <div class="hero-stick">
       <div class="bunting top" data-bunting></div>
+      <div class="hero-confetti" data-confetti aria-hidden="true"></div>
+      <img class="hero-pack hp-rumba" data-depth="1.4" src="assets/fotos/paquete-rumba.webp" alt="" width="395" height="184">
+      <img class="hero-pack hp-merengadas" data-depth="1" src="assets/fotos/paquete-merengadas.webp" alt="" width="473" height="125">
+      <img class="hero-pack hp-mellizas" data-depth="1.8" src="assets/fotos/paquete-mellizas.webp" alt="" width="428" height="199">
       <div class="hero-copy">
-        <p class="kicker">Desde 1864 · Buenos Aires</p>
-        <h1 class="hero-title" aria-label="160 años rellenos de sabor">
-          <span class="hero-160" aria-hidden="true"><i>1</i><i>6</i><i>0</i></span>
-          <span class="hero-years" aria-hidden="true">años</span>
-          <span class="hero-script" aria-hidden="true">rellenos de sabor</span>
-        </h1>
+        <div class="badge" aria-hidden="true">
+          <span class="badge-rays"></span>
+          <span class="badge-disc"></span>
+          <img class="badge-logo" src="assets/logo-bagley.png" alt="" width="248" height="157">
+          <span class="badge-160"><b>160</b><em>años</em></span>
+        </div>
+        <h1 class="hero-title">Rellenos de sabor<span class="sr"> · Bagley, 160 años</span></h1>
+        <p class="hero-sub">Desde 1864 en todas las meriendas del país.</p>
       </div>
       <canvas id="hero-canvas" aria-hidden="true"></canvas>
       <p class="hero-hint"><b>Bajá</b> y llená la pantalla de galletitas.<span class="hero-meter"><i></i></span></p>
@@ -214,7 +195,7 @@
     <h2>¿Quedó alguna en el paquete?</h2>
     <button type="button" class="btn btn-white" id="pinata-btn" data-magnet>Romper la piñata</button>
   </div>
-  <div class="foot-word" aria-hidden="true">Bagley</div>
+  <div class="foot-word" aria-hidden="true"><img src="assets/logo-bagley.png" alt="" width="248" height="157" loading="lazy"></div>
   <div class="foot-info wrap">
     <p>Proyecto conceptual de portfolio. No es un sitio oficial ni está afiliado a Bagley; las marcas pertenecen a sus titulares. Imágenes de galletitas generadas con IA.</p>
     <p>Diseño y desarrollo: <a href="https://avanth.com.ar">Avanth Studio</a> · Pssst: escribí “rumba”.</p>

@@ -1,4 +1,4 @@
-// Orquesta todo: loader, scroll suave, secciones e interacciones chicas.
+// Orquesta todo: scroll suave, secciones e interacciones chicas.
 import { sound } from './sound.js';
 import { initCrack } from './crack.js';
 import { initPinata } from './pinata.js';
@@ -8,28 +8,29 @@ const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const $ = s => document.querySelector(s);
 const $$ = s => [...document.querySelectorAll(s)];
 
-/* ---------- loader ---------- */
-const TOTAL = 4;
-let done = 0, shown = 0;
-const t0 = performance.now();
-const tick = () => { done = Math.min(TOTAL, done + 1); };
-function loaderLoop() {
-  const minP = Math.min(1, (performance.now() - t0) / 1800);
-  const target = Math.min(done / TOTAL, minP);
-  shown += (target - shown) * .12;
-  $('#loader-bar').style.width = shown * 100 + '%';
-  $('#loader-year').textContent = Math.round(1864 + shown * 160);
-  if (shown > .995 && done >= TOTAL) return finishLoader();
-  requestAnimationFrame(loaderLoop);
+/* ---------- confetti y paquetes del inicio ---------- */
+const confHost = $('[data-confetti]');
+if (confHost) {
+  const COLS = ['#FFD200', '#FFFFFF', '#5DBB46', '#1B9DD9', '#F27FB2'];
+  let seed = 3; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+  for (let i = 0; i < 70; i++) {
+    const c = document.createElement('i'), round = rnd() < .35, w = round ? 8 + rnd() * 6 : 6 + rnd() * 6;
+    c.className = round ? 's' : '';
+    Object.assign(c.style, { left: rnd() * 100 + '%', top: rnd() * 100 + '%', width: w + 'px', height: (round ? w : w * 2.2) + 'px', background: COLS[i % COLS.length], rotate: rnd() * 180 + 'deg', animationDelay: -rnd() * 6 + 's', opacity: .85 });
+    confHost.appendChild(c);
+  }
 }
-function finishLoader() {
-  $('#loader-year').textContent = '2024';
-  const l = $('#loader');
-  l.classList.add('open');
-  setTimeout(() => { l.classList.add('done'); document.body.classList.remove('is-loading'); document.body.classList.add('ready'); }, 650);
-}
-requestAnimationFrame(loaderLoop);
-setTimeout(() => { done = TOTAL; }, 9000); // si algo tarda demasiado, igual se entra
+const heroPacks = $$('.hero-pack');
+let pmx = 0, pmy = 0, ptx = 0, pty = 0;
+addEventListener('pointermove', e => { ptx = e.clientX / innerWidth - .5; pty = e.clientY / innerHeight - .5; }, { passive: true });
+(function packLoop(t) {
+  pmx += (ptx - pmx) * .06; pmy += (pty - pmy) * .06;
+  heroPacks.forEach((p, i) => {
+    const d = +p.dataset.depth, bob = reduce ? 0 : Math.sin((t || 0) / 900 + i * 2) * 8;
+    p.style.transform = `translate(${(pmx * 30 * d).toFixed(1)}px, ${(pmy * 22 * d + bob).toFixed(1)}px) rotate(calc(var(--r) + ${(pmx * 4 * d).toFixed(2)}deg))`;
+  });
+  requestAnimationFrame(packLoop);
+})();
 
 /* ---------- banderines ---------- */
 $$('[data-bunting]').forEach(b => {
@@ -170,9 +171,7 @@ addEventListener('keydown', e => {
 });
 
 /* ---------- módulos grandes ---------- */
-document.fonts.ready.then(tick);
-initCrack($$('.scene')).then(tick, tick);
+initCrack($$('.scene'));
 initPinata($('#pinata-canvas'), $('#pinata-btn'));
-tick();
 
-initHero($('#inicio'), $('#hero-canvas')).then(tick);
+initHero($('#inicio'), $('#hero-canvas'));
