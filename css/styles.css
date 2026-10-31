@@ -195,7 +195,7 @@ button { font: inherit; color: inherit; }
 .copy .tag { font-weight: 900; font-size: 13px; letter-spacing: 2px; text-transform: uppercase; }
 .copy h3 { font-family: var(--f-script); font-weight: 400; font-size: clamp(70px, 9vw, 140px); line-height: .9; color: var(--title); text-shadow: 0 4px 0 var(--shadow); }
 .copy p { font-size: 18px; font-weight: 600; max-width: 40ch; }
-/* medidores: etiqueta y número grandes arriba, barra gruesa a todo el ancho */
+/* medidores: etiqueta y número grandes arriba, barra lisa a todo el ancho */
 .meter {
   display: grid; grid-template-columns: 1fr auto; align-items: end; column-gap: 12px; row-gap: 8px;
   font-weight: 900; font-size: 15px; letter-spacing: 2px; text-transform: uppercase;
@@ -208,8 +208,7 @@ button { font: inherit; color: inherit; }
 }
 .meter i b {
   display: block; height: 100%; width: 0; border-radius: 99px;
-  background: repeating-linear-gradient(-45deg, var(--ink) 0 12px, color-mix(in srgb, var(--ink) 82%, transparent) 12px 24px);
-  box-shadow: inset 0 -4px 0 rgba(0,0,0,.18), inset 0 4px 0 rgba(255,255,255,.18);
+  background: var(--ink);
 }
 .stage { position: relative; z-index: 1; width: min(84vh, 100%); aspect-ratio: 1; justify-self: center; }
 .stage img { position: absolute; display: block; will-change: transform; user-select: none; -webkit-user-drag: none; pointer-events: none; }
@@ -220,7 +219,7 @@ button { font: inherit; color: inherit; }
 
 /* ---------- álbum ---------- */
 .album { height: 320vh; position: relative; background: var(--crema); color: var(--choco); }
-.album-stick { position: sticky; top: 0; height: 100vh; overflow: hidden; display: grid; grid-template-rows: auto 1fr auto; padding: 14vh 0 6vh; }
+.album-stick { grid-template-columns: minmax(0, 1fr); position: sticky; top: 0; height: 100vh; overflow: hidden; display: grid; grid-template-rows: auto 1fr auto; padding: 14vh 0 6vh; }
 .album-head { padding: 0 5vw; display: grid; gap: 10px; }
 .album-head .kicker { color: var(--rojo); }
 .album-head h2 { font-size: clamp(46px, 6.5vw, 96px); color: var(--rojo); }
@@ -302,9 +301,10 @@ button { font: inherit; color: inherit; }
   .nav-links { display: none; }
   .nav-logo { width: 84px; }
   .nav .btn { padding: 11px 16px; font-size: 12px; }
-  .hp-rumba { width: 34vw; left: -5vw; top: 11vh; }
-  .hp-merengadas { width: 42vw; right: -8vw; top: 13vh; }
-  .hp-mellizas { display: none; }
+  .hp-rumba { width: 36vw; left: -4vw; top: 15vh; }
+  .hp-merengadas { width: 44vw; right: -7vw; top: 20vh; }
+  .hp-mellizas { width: 32vw; right: -4vw; left: auto; top: auto; bottom: 18vh; }
+  .hero-hint { border-radius: 22px; font-size: 14px; text-align: center; width: max-content; max-width: 70vw; }
   .stats { grid-template-columns: repeat(2, 1fr); }
   .mani-top { grid-template-columns: 1fr; }
   .packs { margin-top: 4vh; justify-items: center; gap: 6vh; }
@@ -316,6 +316,7 @@ button { font: inherit; color: inherit; }
   .meter i { height: 18px; }
   .stage { width: min(92vw, 48vh); align-self: center; }
   .album-stick { padding-top: 12vh; }
+  .album-head h2 { font-size: clamp(40px, 12vw, 60px); }
   .about-grid { grid-template-columns: 1fr; }
 }
 
