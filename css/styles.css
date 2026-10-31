@@ -138,7 +138,7 @@ button { font: inherit; color: inherit; }
 .hero-pack { position: absolute; z-index: 1; height: auto; filter: drop-shadow(0 24px 30px rgba(70, 5, 8, .45)); pointer-events: none; will-change: transform; }
 .hp-rumba { width: min(21vw, 320px); left: 4vw; top: 30vh; --r: -10deg; }
 .hp-merengadas { width: min(25vw, 380px); right: 4vw; top: 18vh; --r: 8deg; }
-.hp-mellizas { width: min(19vw, 290px); right: 3vw; bottom: 6vh; --r: -6deg; }
+.hp-mellizas { width: min(19vw, 290px); right: 5vw; top: 48vh; --r: -6deg; }
 .hero-confetti { position: absolute; inset: 0; z-index: 0; pointer-events: none; }
 .hero-confetti i { position: absolute; display: block; border-radius: 2px; }
 .hero-confetti i.s { border-radius: 50%; }
