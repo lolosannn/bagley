@@ -104,14 +104,14 @@ button[aria-pressed="true"] { background: var(--choco); color: var(--amarillo); 
     <path d="M86 118 C120 112 160 104 196 84" fill="none" stroke="#FFFFFF" stroke-width="4.5" stroke-linecap="round" transform="rotate(-7 122 96)"/>
   </svg>
   <div class="toolbar">
-    <button id="btn-all" aria-pressed="false">Ver las 6</button>
+    <button id="btn-all" aria-pressed="false">Ver las 3</button>
     <button id="btn-new">Galletita nueva</button>
     <button id="btn-spin" aria-pressed="true">Girar sola</button>
   </div>
 </div>
 
 <div class="ui title" aria-live="polite">
-  <div class="idx" id="p-idx">01 / 06</div>
+  <div class="idx" id="p-idx">01 / 03</div>
   <h1 id="p-name">Sonrisas</h1>
   <p id="p-desc"></p>
 </div>
@@ -329,7 +329,7 @@ function dashedRoundRect(ctx, P, S, hw, hh, r, dash, gap, w) {
   ctx.beginPath(); ctx.roundRect(x0, y0, S(hw * 2), S(hh * 2), S(r)); ctx.stroke(); ctx.setLineDash([]);
 }
 
-const PRODUCTS = [
+const ALL_PRODUCTS = [
   {
     id: 'sonrisas', name: 'Sonrisas', tag: 'La que te sonríe de vuelta',
     desc: 'Masa de manteca, cara calada y relleno sabor frambuesa que se asoma por los ojos y la sonrisa.',
@@ -396,7 +396,9 @@ const PRODUCTS = [
   },
 ];
 // la sdf de Merengadas usa la función directa
-PRODUCTS[4].layers[1].sdf = PRODUCTS[4].layers[1].sdfFn;
+ALL_PRODUCTS[4].layers[1].sdf = ALL_PRODUCTS[4].layers[1].sdfFn;
+// en la web van solo estas tres
+const PRODUCTS = ['rumba', 'merengadas', 'mellizas'].map(id => ALL_PRODUCTS.find(p => p.id === id));
 
 /* ---------- dibujos del relieve ---------- */
 const RELIEFS = {
@@ -751,7 +753,7 @@ function toast(msg) { const t = $('toast'); t.textContent = msg; t.classList.add
 function setProduct(i) {
   current = (i + PRODUCTS.length) % PRODUCTS.length;
   const p = PRODUCTS[current];
-  $('p-idx').textContent = `${String(current + 1).padStart(2, '0')} / 06 · ${p.tag}`;
+  $('p-idx').textContent = `${String(current + 1).padStart(2, '0')} / 03 · ${p.tag}`;
   const h = $('p-name'); h.textContent = p.name; h.classList.toggle('script', !!p.script);
   $('p-desc').textContent = p.desc;
   document.documentElement.style.setProperty('--bg1', p.bg[0]);
@@ -773,7 +775,7 @@ PRODUCTS.forEach((p, i) => {
 function toggleAll(force) {
   mode = (force ?? mode !== 'all') ? 'all' : 'one';
   $('btn-all').setAttribute('aria-pressed', String(mode === 'all'));
-  $('btn-all').textContent = mode === 'all' ? 'Ver una' : 'Ver las 6';
+  $('btn-all').textContent = mode === 'all' ? 'Ver una' : 'Ver las 3';
   document.querySelector('.title').style.opacity = mode === 'all' ? 0 : 1;
   document.querySelector('.explode').style.opacity = mode === 'all' ? 0 : 1;
 }
@@ -856,10 +858,9 @@ function frame() {
       yaw = rot.yaw + (1 - k) * 2.5; tilt = -.95 + rot.pitch + Math.sin(t * .9) * .05;
       c.root.visible = s > .01;
     } else {
-      const col = i % 3, row = (i / 3) | 0;
-      tx = (col - 1) * (mobile ? 1.6 : 2.6); ty = -.25 + Math.sin(t * 1.2 + i) * .04; tz = row ? 1.1 : -1.3;
-      if (mobile) { tx = (i % 2 - .5) * 1.9; tz = (Math.floor(i / 2) - 1) * 1.6; }
-      s = mobile ? .62 : .78; yaw = t * .3 + i; tilt = -1.15; c.root.visible = true;
+      tx = (i - 1) * 2.7; ty = -.2 + Math.sin(t * 1.2 + i) * .04; tz = i === 1 ? -.6 : .4;
+      if (mobile) { tx = 0; tz = (i - 1) * 1.9; }
+      s = mobile ? .7 : .95; yaw = t * .3 + i; tilt = -1.15; c.root.visible = true;
     }
     c.root.position.x = lerp(c.root.position.x, tx, .1);
     c.root.position.y = lerp(c.root.position.y, ty, .1);
