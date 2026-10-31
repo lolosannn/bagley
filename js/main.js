@@ -1,8 +1,6 @@
 // Orquesta todo: loader, scroll suave, secciones e interacciones chicas.
 import { sound } from './sound.js';
 import { initCrack } from './crack.js';
-import { initDunk } from './dunk.js';
-import { initSurtido } from './surtido.js';
 import { initPinata } from './pinata.js';
 import { initHero } from './hero.js';
 
@@ -173,8 +171,6 @@ addEventListener('keydown', e => {
 /* ---------- módulos grandes ---------- */
 document.fonts.ready.then(tick);
 initCrack($$('.scene')).then(tick, tick);
-initDunk($('#dunk-canvas'));
-initSurtido($('#bag-canvas'), $('#surtido-form'));
 initPinata($('#pinata-canvas'), $('#pinata-btn'));
 tick();
 

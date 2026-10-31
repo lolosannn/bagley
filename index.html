@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Bagley · 160 años rellenos de sabor</title>
-<meta name="description" content="Concepto web interactivo para Bagley: galletitas en 3D, galletitas que se parten con el scroll, juego de mojar y tu propio Surtido. Proyecto de portfolio no oficial.">
+<meta name="description" content="Concepto web interactivo para Bagley: galletitas en 3D, galletitas que se parten con el scroll, álbum de figuritas y una piñata. Proyecto de portfolio no oficial.">
 <meta name="theme-color" content="#E3202A">
 <meta property="og:title" content="Bagley · 160 años rellenos de sabor">
 <meta property="og:description" content="Concepto web interactivo. Proyecto de portfolio de Avanth Studio, no oficial.">
@@ -53,14 +53,13 @@
     <ul class="nav-links">
       <li><a href="#galletitas">Galletitas</a></li>
       <li><a href="#historia">Historia</a></li>
-      <li><a href="#mojar">Jugar</a></li>
     </ul>
   </nav>
   <div class="nav-actions">
     <button class="sound" id="sound" type="button" aria-pressed="false" aria-label="Activar sonido" data-cursor="Sonido">
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9h4l5-4v14l-5-4H4z" fill="currentColor"/><path class="waves" d="M16 9c1.5 1.5 1.5 4.5 0 6M18.5 6.5c3 3 3 8 0 11" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
     </button>
-    <a href="#surtido" class="btn btn-white" data-magnet>Armá tu Surtido</a>
+    <a href="#galletitas" class="btn btn-white" data-magnet>Ver galletitas</a>
   </div>
 </header>
 
@@ -201,79 +200,6 @@
     </div>
   </section>
 
-  <!-- ============ JUEGO: mojar la galletita ============ -->
-  <section id="mojar" class="dunk" data-theme="azul">
-    <div class="wrap dunk-grid">
-      <div class="dunk-copy">
-        <p class="kicker">Juego</p>
-        <h2>El arte de mojar</h2>
-        <p>Agarrá la galletita, metela en la taza y sacala antes de que se parta. Cuanto más mojada sin romperse, mejor puntaje.</p>
-        <div class="chip-row" role="group" aria-label="Galletita">
-          <button type="button" class="chip" data-dunk-cookie="rumba" aria-pressed="true">Rumba</button>
-          <button type="button" class="chip" data-dunk-cookie="merengadas" aria-pressed="false">Merengadas</button>
-          <button type="button" class="chip" data-dunk-cookie="mellizas" aria-pressed="false">Mellizas</button>
-        </div>
-        <div class="chip-row" role="group" aria-label="Para mojar">
-          <button type="button" class="chip" data-dunk-liquid="leche" aria-pressed="true">Leche</button>
-          <button type="button" class="chip" data-dunk-liquid="cafe" aria-pressed="false">Café con leche</button>
-          <button type="button" class="chip" data-dunk-liquid="mate" aria-pressed="false">Mate cocido</button>
-        </div>
-        <div class="dunk-score">
-          <div class="gauge"><i id="dunk-gauge"></i></div>
-          <p><b id="dunk-pct">0%</b> <span id="dunk-msg">Agarrala y mojala.</span></p>
-          <p class="best">Tu récord: <b id="dunk-best">0%</b></p>
-        </div>
-      </div>
-      <div class="dunk-stage">
-        <canvas id="dunk-canvas" data-cursor="Mojá" aria-label="Juego: arrastrá la galletita hasta la taza"></canvas>
-      </div>
-    </div>
-  </section>
-
-  <!-- ============ SURTIDO: personalizador ============ -->
-  <section id="surtido" class="surtido" data-theme="crema">
-    <div class="wrap surtido-grid">
-      <div class="bag-stage" id="bag-stage">
-        <canvas id="bag-canvas" width="1000" height="1250" data-cursor="Sacudilo" aria-label="Vista previa de tu paquete de Surtido"></canvas>
-      </div>
-      <form class="surtido-form" id="surtido-form">
-        <p class="kicker">Personalizá</p>
-        <h2>Armá tu Surtido</h2>
-        <p>Tu nombre, tus galletitas, tu estampado. Lo bajás como imagen para compartir.</p>
-        <label for="bag-name">Tu nombre</label>
-        <input id="bag-name" name="name" maxlength="16" value="Lorenzo" autocomplete="off">
-        <fieldset>
-          <legend>Qué lleva</legend>
-          <label class="check"><input type="checkbox" id="bag-c-rumba" name="cookies" value="rumba" checked> Rumba</label>
-          <label class="check"><input type="checkbox" id="bag-c-merengadas" name="cookies" value="merengadas" checked> Merengadas</label>
-          <label class="check"><input type="checkbox" id="bag-c-mellizas" name="cookies" value="mellizas" checked> Mellizas</label>
-        </fieldset>
-        <fieldset>
-          <legend>Color</legend>
-          <div class="swatches">
-            <label><input type="radio" id="bag-col-1" name="color" value="#FFD200" checked><i style="background:#FFD200"></i><span class="sr">Amarillo</span></label>
-            <label><input type="radio" id="bag-col-2" name="color" value="#E3202A"><i style="background:#E3202A"></i><span class="sr">Rojo</span></label>
-            <label><input type="radio" id="bag-col-3" name="color" value="#3FA9E0"><i style="background:#3FA9E0"></i><span class="sr">Celeste</span></label>
-            <label><input type="radio" id="bag-col-4" name="color" value="#F27FB2"><i style="background:#F27FB2"></i><span class="sr">Rosa</span></label>
-            <label><input type="radio" id="bag-col-5" name="color" value="#5DBB46"><i style="background:#5DBB46"></i><span class="sr">Verde</span></label>
-          </div>
-        </fieldset>
-        <fieldset>
-          <legend>Estampado</legend>
-          <div class="chip-row">
-            <label class="chip-radio"><input type="radio" id="bag-p-1" name="pattern" value="confetti" checked><span>Confetti</span></label>
-            <label class="chip-radio"><input type="radio" id="bag-p-2" name="pattern" value="globos"><span>Globos</span></label>
-            <label class="chip-radio"><input type="radio" id="bag-p-3" name="pattern" value="banderines"><span>Banderines</span></label>
-            <label class="chip-radio"><input type="radio" id="bag-p-4" name="pattern" value="liso"><span>Liso</span></label>
-          </div>
-        </fieldset>
-        <div class="form-actions">
-          <button type="button" class="btn btn-red" id="bag-download" data-magnet>Descargar PNG</button>
-          <button type="button" class="btn btn-outline" id="bag-random">Al azar</button>
-        </div>
-      </form>
-    </div>
-  </section>
 </main>
 
 <!-- ============ FOOTER: piñata ============ -->

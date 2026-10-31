@@ -5,7 +5,7 @@ Sitio estático interactivo para Bagley (160 años). Proyecto de portfolio de Av
 - `index.html`, `css/styles.css`, `js/`: la web. Sin build: Lenis se carga desde jsDelivr.
 - `js/hero.js`: inicio que se llena de galletitas con física mientras bajás.
 - `js/crack.js`: galletitas en foto que se parten con el scroll (`assets/fotos/`).
-- `js/dunk.js`, `js/surtido.js`, `js/pinata.js`: juego de mojar, personalizador y footer.
+- `js/pinata.js`: footer con galletitas que se empujan con el mouse.
 - `design/`: propuesta de diseño, laboratorio 3D y demo de galletitas partidas.
 
 ## Ver en GitHub Pages
