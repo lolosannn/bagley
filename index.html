@@ -13,12 +13,6 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Londrina+Solid:wght@300;400;900&family=Nunito:wght@400;600;700;800;900&family=Yellowtail&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/styles.css">
-<script type="importmap">
-{ "imports": {
-  "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
-  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"
-} }
-</script>
 <script src="https://cdn.jsdelivr.net/npm/lenis@1.1.13/dist/lenis.min.js" defer></script>
 <script type="module" src="js/main.js"></script>
 </head>
@@ -73,18 +67,19 @@
 <main>
   <!-- ============ HERO ============ -->
   <section id="inicio" class="hero" data-theme="rojo">
-    <div class="bunting top" data-bunting></div>
-    <canvas id="hero-gl" data-cursor="Mordé"></canvas>
-    <div class="hero-copy">
-      <p class="kicker">Desde 1864 · Buenos Aires</p>
-      <h1 class="hero-title" aria-label="160 años rellenos de sabor">
-        <span class="hero-160" aria-hidden="true"><i>1</i><i>6</i><i>0</i></span>
-        <span class="hero-years" aria-hidden="true">años</span>
-        <span class="hero-script" aria-hidden="true">rellenos de sabor</span>
-      </h1>
+    <div class="hero-stick">
+      <div class="bunting top" data-bunting></div>
+      <div class="hero-copy">
+        <p class="kicker">Desde 1864 · Buenos Aires</p>
+        <h1 class="hero-title" aria-label="160 años rellenos de sabor">
+          <span class="hero-160" aria-hidden="true"><i>1</i><i>6</i><i>0</i></span>
+          <span class="hero-years" aria-hidden="true">años</span>
+          <span class="hero-script" aria-hidden="true">rellenos de sabor</span>
+        </h1>
+      </div>
+      <canvas id="hero-canvas" data-cursor="Empujá" aria-hidden="true"></canvas>
+      <p class="hero-hint"><b>Bajá</b> y llená la pantalla de galletitas.<span class="hero-meter"><i></i></span></p>
     </div>
-    <p class="hero-hint"><b>Tocá la Rumba.</b> Dale, nadie te ve.<span id="bite-count"></span></p>
-    <a href="#manifiesto" class="scroll-cue" aria-label="Bajar"><span></span></a>
   </section>
 
   <!-- ============ MANIFIESTO ============ -->

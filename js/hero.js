@@ -1,169 +1,100 @@
-// Hero: Rumba 3D gigante que se deja morder, con Merengadas y Mellizas orbitando entre confetti.
-import * as THREE from 'three';
-import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
-import { Cookie, PRODUCTS, C } from './cookie3d.js';
+// Hero: mientras bajás caen galletitas con física hasta tapar la pantalla; si subís, se van sacando.
 import { sound } from './sound.js';
 
-const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const KINDS = ['rumba', 'merengadas', 'mellizas'];
 
-export async function initHero(canvas, { onProgress = () => {} } = {}) {
-  const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
-  renderer.setPixelRatio(Math.min(devicePixelRatio, 1.75));
-  renderer.toneMapping = THREE.ACESFilmicToneMapping;
-  renderer.toneMappingExposure = 1.1;
+export function initHero(section, canvas, base = 'assets/fotos/') {
+  const ctx = canvas.getContext('2d');
+  const imgs = {};
+  const ready = Promise.all(KINDS.map(k => new Promise(res => {
+    const i = new Image(); i.src = base + k + '-entera.webp';
+    i.onload = () => { imgs[k] = i; res(); }; i.onerror = res;
+  })));
 
-  const scene = new THREE.Scene();
-  const pmrem = new THREE.PMREMGenerator(renderer);
-  scene.environment = pmrem.fromScene(new RoomEnvironment(), .04).texture;
-  scene.environmentIntensity = .6;
-
-  const camera = new THREE.PerspectiveCamera(32, 1, .1, 100);
-  camera.position.set(0, .2, 9);
-
-  const key = new THREE.DirectionalLight(0xfff1dc, 2.6); key.position.set(3, 5, 6); scene.add(key);
-  const rim = new THREE.DirectionalLight(0xffd6c0, 2); rim.position.set(-5, 3, -4); scene.add(rim);
-  scene.add(new THREE.HemisphereLight(0xfff6e8, 0x8a1a1a, .6));
-
-  // ---- galletitas: se arman de a una para que el loader avance
-  const byId = id => PRODUCTS.find(p => p.id === id);
-  const build = async id => { const c = new Cookie(byId(id)); scene.add(c.root); onProgress(); await new Promise(r => setTimeout(r, 0)); return c; };
-  const main = await build('rumba');
-  const sides = [await build('merengadas'), await build('mellizas')];
-
-  // ---- confetti 3D
-  const COLORS = ['#FFD200', '#FFFFFF', '#5DBB46', '#1B9DD9', '#F27FB2', '#FFD200'];
-  const N = innerWidth < 760 ? 70 : 140;
-  const conf = new THREE.InstancedMesh(new THREE.PlaneGeometry(.09, .2), new THREE.MeshStandardMaterial({ side: THREE.DoubleSide, roughness: .5, metalness: .1 }), N);
-  const confData = [];
-  const dummy = new THREE.Object3D();
-  for (let i = 0; i < N; i++) {
-    confData.push({ x: (Math.random() - .5) * 14, y: (Math.random() - .5) * 9, z: -4 + Math.random() * 7, vy: .25 + Math.random() * .5, r: Math.random() * 6, vr: (Math.random() - .5) * 4, s: .6 + Math.random() * .8 });
-    conf.setColorAt(i, C(COLORS[i % COLORS.length]));
-  }
-  scene.add(conf);
-
-  // ---- migas
-  const CR = 200;
-  const crumbMesh = new THREE.InstancedMesh(new THREE.IcosahedronGeometry(1, 0), new THREE.MeshStandardMaterial({ roughness: .9 }), CR);
-  crumbMesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
-  const crumbs = Array.from({ length: CR }, () => ({ life: 0, p: new THREE.Vector3(), v: new THREE.Vector3(), r: new THREE.Euler(), s: 0 }));
-  for (let i = 0; i < CR; i++) crumbMesh.setColorAt(i, new THREE.Color());
-  scene.add(crumbMesh);
-  let head = 0;
-  function emitCrumbs(world, color, n = 30) {
-    const c = C(color);
-    for (let k = 0; k < n; k++) {
-      const cr = crumbs[head]; crumbMesh.setColorAt(head, c.clone().multiplyScalar(.8 + Math.random() * .4)); head = (head + 1) % CR;
-      cr.life = 2.5 + Math.random();
-      cr.p.copy(world);
-      cr.v.set((Math.random() - .5) * 4, Math.random() * 3.5, 1 + Math.random() * 2);
-      cr.s = .015 + Math.random() ** 2 * .06;
-    }
-    crumbMesh.instanceColor.needsUpdate = true;
-  }
-
-  // ---- interacción
-  const mouse = { x: 0, y: 0, tx: 0, ty: 0 };
-  const spin = { yaw: 0, v: 0 };
-  let down = null, bites = 0, progress = 0, visible = true;
-  const counter = document.getElementById('bite-count');
-  addEventListener('pointermove', e => { mouse.tx = e.clientX / innerWidth * 2 - 1; mouse.ty = e.clientY / innerHeight * 2 - 1; });
-  canvas.addEventListener('pointerdown', e => { down = { x: e.clientX, lx: e.clientX, moved: 0 }; });
-  addEventListener('pointermove', e => {
-    if (!down) return;
-    const dx = e.clientX - down.lx; down.lx = e.clientX; down.moved += Math.abs(dx);
-    if (down.moved > 6) { spin.v = dx * .01; spin.yaw += dx * .01; }
-  });
-  addEventListener('pointerup', e => { if (down && down.moved < 6 && e.target === canvas) bite(e); down = null; });
-
-  const ray = new THREE.Raycaster(), ndc = new THREE.Vector2();
-  function bite(e) {
-    const r = canvas.getBoundingClientRect();
-    ndc.set((e.clientX - r.left) / r.width * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1);
-    ray.setFromCamera(ndc, camera);
-    const all = [main, ...sides];
-    const hit = ray.intersectObjects(all.map(c => c.inner), true)[0];
-    if (!hit) return;
-    const ck = all.find(c => c.inner.children.includes(hit.object));
-    const local = ck.inner.worldToLocal(hit.point.clone());
-    const edge = ck.bite(local.x, local.y);
-    emitCrumbs(ck.inner.localToWorld(new THREE.Vector3(edge.x, edge.y, 0)), ck.spec.dough.edge);
-    sound.crunch();
-    bites++;
-    const left = ck.remaining();
-    if (left < .15) {
-      ck.pop = 1;
-      setTimeout(() => { ck.resetBites(); ck.pop = 0; ck.root.scale.setScalar(.001); }, 380);
-      counter.textContent = '¡Te la comiste toda! Ahí va otra';
-    } else {
-      counter.textContent = `${bites} ${bites === 1 ? 'mordisco' : 'mordiscos'} · queda ${Math.round(left * 100)}%`;
-    }
-  }
+  let W = 0, H = 0, dpr = 1, R = 50, maxN = 100;
+  const bodies = [];
+  let seq = 0;
+  const mouse = { x: -999, y: -999, vx: 0, vy: 0 };
 
   function resize() {
-    const w = canvas.clientWidth, h = canvas.clientHeight;
-    renderer.setSize(w, h, false);
-    camera.aspect = w / h;
-    camera.fov = w < 760 ? 44 : 32;
-    camera.updateProjectionMatrix();
+    const r = canvas.getBoundingClientRect();
+    dpr = Math.min(devicePixelRatio, 2); W = r.width; H = r.height;
+    canvas.width = Math.round(W * dpr); canvas.height = Math.round(H * dpr);
+    R = Math.max(30, Math.min(60, W / 24));
+    // suficientes para cubrir toda la pantalla (los sprites son más grandes que su círculo de choque)
+    maxN = Math.ceil(W * H / (R * R * 2.35)) + 8;
   }
-  addEventListener('resize', resize); resize();
+  new ResizeObserver(resize).observe(canvas); resize();
 
-  const clock = new THREE.Clock();
-  const mobile = () => innerWidth < 760;
-  function frame() {
-    requestAnimationFrame(frame);
-    if (!visible) return;
-    const dt = Math.min(clock.getDelta(), 1 / 30), t = clock.elapsedTime;
-    mouse.x += (mouse.tx - mouse.x) * .06; mouse.y += (mouse.ty - mouse.y) * .06;
-    if (!down) { spin.v *= .95; spin.yaw += spin.v; spin.yaw *= .985; }
-    const m = mobile();
-
-    // principal
-    const s0 = (m ? .8 : 1.02);
-    const grow = main.pop ? .001 : 1;
-    const cur = main.root.scale.x; main.root.scale.setScalar(cur + (s0 * grow - cur) * (main.pop ? .3 : .08));
-    main.root.position.set(mouse.x * .15, (m ? -1.55 : -1.75) + Math.sin(t * 1.2) * .08 + progress * 2.5, 0);
-    main.root.rotation.set(-.42 + mouse.y * .25 + progress * 1.2, mouse.x * .5 + spin.yaw + (reduce ? 0 : Math.sin(t * .5) * .15), mouse.x * -.08);
-
-    // orbitan
-    sides.forEach((c, i) => {
-      const a = t * (reduce ? 0 : .25) + i * Math.PI;
-      const ss = (m ? .55 : .7);
-      const g = c.pop ? .001 : 1; const cs = c.root.scale.x; c.root.scale.setScalar(cs + (ss * g - cs) * (c.pop ? .3 : .06));
-      c.root.position.set(Math.cos(a) * (m ? 2 : 3.6) - mouse.x * .4, -1.1 + Math.sin(a * 2) * .5 + progress * 3.5, Math.sin(a) * 1.6 - 1);
-      c.root.rotation.set(-.6 + Math.sin(t + i) * .2, a * 1.5, .3 * Math.sin(t * .7 + i));
-    });
-
-    // confetti
-    for (let i = 0; i < N; i++) {
-      const d = confData[i];
-      if (!reduce) { d.y -= d.vy * dt; d.r += d.vr * dt; }
-      if (d.y < -5) { d.y = 5; d.x = (Math.random() - .5) * 14; }
-      dummy.position.set(d.x + Math.sin(t + i) * .2 - mouse.x * (d.z + 4) * .08, d.y + progress * 4, d.z);
-      dummy.rotation.set(d.r, d.r * .7, d.r * .3);
-      dummy.scale.setScalar(d.s);
-      dummy.updateMatrix(); conf.setMatrixAt(i, dummy.matrix);
-    }
-    conf.instanceMatrix.needsUpdate = true;
-
-    // migas
-    for (let i = 0; i < CR; i++) {
-      const cr = crumbs[i];
-      if (cr.life > 0) {
-        cr.life -= dt; cr.v.y -= 9.8 * dt; cr.p.addScaledVector(cr.v, dt);
-        cr.r.x += dt * 8; cr.r.y += dt * 6;
-        dummy.position.copy(cr.p); dummy.rotation.copy(cr.r); dummy.scale.setScalar(cr.s * Math.min(1, cr.life));
-      } else dummy.scale.setScalar(0);
-      dummy.updateMatrix(); crumbMesh.setMatrixAt(i, dummy.matrix);
-    }
-    crumbMesh.instanceMatrix.needsUpdate = true;
-
-    renderer.render(scene, camera);
+  function spawn() {
+    const k = KINDS[seq++ % 3];
+    bodies.push({ k, r: R * (.85 + Math.random() * .3), x: R + Math.random() * (W - 2 * R), y: -R - Math.random() * 160, vx: (Math.random() - .5) * 120, vy: 200 + Math.random() * 200, a: Math.random() * 6.28, va: (Math.random() - .5) * 6 });
   }
-  frame();
 
-  return {
-    setProgress(p) { progress = p; visible = p < 1; },
-  };
+  const pos = e => { const r = canvas.getBoundingClientRect(); return [e.clientX - r.left, e.clientY - r.top]; };
+  addEventListener('pointermove', e => { const [x, y] = pos(e); mouse.vx = x - mouse.x; mouse.vy = y - mouse.y; mouse.x = x; mouse.y = y; }, { passive: true });
+  canvas.addEventListener('pointerdown', e => {
+    const [x, y] = pos(e);
+    for (const b of bodies) { const d = Math.hypot(b.x - x, b.y - y); if (d < b.r * 3) { b.vy -= 900 * (1 - d / (b.r * 3)); b.vx += (b.x - x) * 8; } }
+    sound.pop();
+  });
+
+  let progress = 0, last = performance.now(), lastRattle = 0;
+  function step(now) {
+    requestAnimationFrame(step);
+    const sr = section.getBoundingClientRect();
+    if (sr.bottom < 0 || sr.top > innerHeight) { last = now; return; }
+    progress = Math.min(1, Math.max(0, -sr.top / (sr.height - innerHeight)));
+    const dt = Math.min((now - last) / 1000, 1 / 30); last = now;
+
+    // cuántas tiene que haber según el scroll: unas pocas de entrada, todas al 85%
+    const target = Math.round(10 + (maxN - 10) * Math.min(1, progress / .85));
+    let spawned = 0;
+    while (bodies.length < target && spawned < 5) { spawn(); spawned++; }
+    if (spawned && now - lastRattle > 220) { lastRattle = now; sound.rattle(); }
+    while (bodies.length > target + 3) bodies.pop();
+
+    // física
+    const floor = H;
+    for (const b of bodies) {
+      b.vy += 2000 * dt; b.vx *= .995;
+      b.x += b.vx * dt; b.y += b.vy * dt; b.a += b.va * dt;
+      const md = Math.hypot(b.x - mouse.x, b.y - mouse.y);
+      if (md < b.r + 26) { b.vx += mouse.vx * 10; b.vy += mouse.vy * 10 - 40; }
+      if (b.y > floor - b.r) { b.y = floor - b.r; b.vy *= -.3; b.vx *= .88; b.va = b.vx / b.r * .6; }
+      if (b.x < b.r) { b.x = b.r; b.vx *= -.4; }
+      if (b.x > W - b.r) { b.x = W - b.r; b.vx *= -.4; }
+    }
+    mouse.vx *= .5; mouse.vy *= .5;
+    const n = bodies.length;
+    for (let it = 0; it < 3; it++) for (let i = 0; i < n; i++) {
+      const a = bodies[i];
+      for (let j = i + 1; j < n; j++) {
+        const c = bodies[j], dx = c.x - a.x, dy = c.y - a.y, m = a.r + c.r;
+        if (dx > m || dx < -m || dy > m || dy < -m) continue;
+        const d = Math.hypot(dx, dy);
+        if (d > 0 && d < m) {
+          const o = (m - d) / 2, nx = dx / d, ny = dy / d;
+          a.x -= nx * o; a.y -= ny * o; c.x += nx * o; c.y += ny * o;
+          const rv = (c.vx - a.vx) * nx + (c.vy - a.vy) * ny;
+          if (rv < 0) { const k = rv * .55; a.vx += nx * k; a.vy += ny * k; c.vx -= nx * k; c.vy -= ny * k; }
+          a.va *= .96; c.va *= .96;
+        }
+      }
+    }
+
+    // dibujo
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, W, H);
+    for (const b of bodies) {
+      const im = imgs[b.k]; if (!im) continue;
+      const w = b.r * 2.5, h = w * im.height / im.width;
+      ctx.save(); ctx.translate(b.x, b.y); ctx.rotate(b.a);
+      ctx.drawImage(im, -w / 2, -h / 2, w, h);
+      ctx.restore();
+    }
+    section.style.setProperty('--fill', Math.min(1, progress / .85).toFixed(3));
+  }
+  requestAnimationFrame(step);
+  return ready;
 }

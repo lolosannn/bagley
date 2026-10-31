@@ -2,8 +2,8 @@
 
 Sitio estático interactivo para Bagley (160 años). Proyecto de portfolio de Avanth Studio, no oficial.
 
-- `index.html`, `css/styles.css`, `js/`: la web. Sin build: Three.js y Lenis se cargan desde jsDelivr.
-- `js/cookie3d.js`: galletitas 3D modeladas por código (hero).
+- `index.html`, `css/styles.css`, `js/`: la web. Sin build: Lenis se carga desde jsDelivr.
+- `js/hero.js`: inicio que se llena de galletitas con física mientras bajás.
 - `js/crack.js`: galletitas en foto que se parten con el scroll (`assets/fotos/`).
 - `js/dunk.js`, `js/surtido.js`, `js/pinata.js`: juego de mojar, personalizador y footer.
 - `design/`: propuesta de diseño, laboratorio 3D y demo de galletitas partidas.

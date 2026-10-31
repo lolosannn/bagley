@@ -4,13 +4,14 @@ import { initCrack } from './crack.js';
 import { initDunk } from './dunk.js';
 import { initSurtido } from './surtido.js';
 import { initPinata } from './pinata.js';
+import { initHero } from './hero.js';
 
 const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const $ = s => document.querySelector(s);
 const $$ = s => [...document.querySelectorAll(s)];
 
 /* ---------- loader ---------- */
-const TOTAL = 6;
+const TOTAL = 4;
 let done = 0, shown = 0;
 const t0 = performance.now();
 const tick = () => { done = Math.min(TOTAL, done + 1); };
@@ -177,14 +178,4 @@ initSurtido($('#bag-canvas'), $('#surtido-form'));
 initPinata($('#pinata-canvas'), $('#pinata-btn'));
 tick();
 
-// el 3D va aparte: si WebGL falla, la página sigue funcionando sin la galletita del hero
-import('./hero.js').then(async ({ initHero }) => {
-  const hero = await initHero($('#hero-gl'), { onProgress: tick });
-  const sec = $('#inicio');
-  const upd = () => { const r = sec.getBoundingClientRect(); hero.setProgress(Math.min(1, Math.max(0, -r.top / r.height))); };
-  addEventListener('scroll', upd, { passive: true }); upd();
-}).catch(err => {
-  console.warn('Sin 3D:', err);
-  done = TOTAL;
-  $('.hero-hint').innerHTML = '<b>160 años</b> rellenos de sabor';
-});
+initHero($('#inicio'), $('#hero-canvas')).then(tick);
