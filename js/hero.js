@@ -120,10 +120,10 @@ export async function initHero(canvas, { onProgress = () => {} } = {}) {
     const m = mobile();
 
     // principal
-    const s0 = (m ? .95 : 1.25);
+    const s0 = (m ? .8 : 1.02);
     const grow = main.pop ? .001 : 1;
     const cur = main.root.scale.x; main.root.scale.setScalar(cur + (s0 * grow - cur) * (main.pop ? .3 : .08));
-    main.root.position.set(mouse.x * .15, (m ? -1.1 : -1.25) + Math.sin(t * 1.2) * .08 + progress * 2.5, 0);
+    main.root.position.set(mouse.x * .15, (m ? -1.55 : -1.75) + Math.sin(t * 1.2) * .08 + progress * 2.5, 0);
     main.root.rotation.set(-.42 + mouse.y * .25 + progress * 1.2, mouse.x * .5 + spin.yaw + (reduce ? 0 : Math.sin(t * .5) * .15), mouse.x * -.08);
 
     // orbitan

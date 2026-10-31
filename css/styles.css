@@ -304,7 +304,7 @@ fieldset { border: 0; padding: 0; margin: 0; display: grid; gap: 8px; }
 .pinata-copy h2 { font-size: clamp(48px, 7vw, 100px); color: var(--blanco); text-shadow: 0 6px 0 var(--rojo-hondo); }
 .pinata-copy .btn { pointer-events: auto; }
 .foot-word { position: relative; z-index: 0; text-align: center; font-family: var(--f-script); color: var(--amarillo); font-size: clamp(120px, 26vw, 380px); line-height: .9; pointer-events: none; }
-.foot-info { position: relative; z-index: 2; display: flex; justify-content: space-between; gap: 20px; flex-wrap: wrap; padding: 22px 0 30px; border-top: 2px solid rgba(255,255,255,.25); font-size: 14px; color: var(--crema); }
+.foot-info { position: relative; z-index: 2; background: rgba(140, 10, 16, .82); backdrop-filter: blur(6px); padding-inline: 22px !important; border-radius: 18px 18px 0 0; width: min(1200px, 100%) !important; display: flex; justify-content: space-between; gap: 20px; flex-wrap: wrap; padding: 22px 0 30px; border-top: 2px solid rgba(255,255,255,.25); font-size: 14px; color: var(--crema); }
 .foot-info a { color: var(--amarillo); font-weight: 900; }
 
 /* ---------- mobile ---------- */

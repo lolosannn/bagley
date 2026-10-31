@@ -37,11 +37,17 @@ $$('[data-bunting]').forEach(b => {
   const n = Math.ceil(innerWidth / 45) + 2;
   for (let i = 0; i < n; i++) b.appendChild(document.createElement('i'));
 });
-let lastMX = 0;
+// los banderines cerca del mouse se mueven con su velocidad (posiciones cacheadas, sin medir en cada movimiento)
+const flags = $$('[data-bunting] i');
+let flagX = [];
+const measureFlags = () => { flagX = flags.map(i => { const r = i.getBoundingClientRect(); return r.left + r.width / 2; }); };
+measureFlags(); addEventListener('resize', measureFlags);
+let lastMX = 0, flagQueued = false, flagV = 0, flagAt = 0;
 addEventListener('pointermove', e => {
-  const v = Math.max(-20, Math.min(20, (e.clientX - lastMX) * .6)); lastMX = e.clientX;
-  $$('[data-bunting] i').forEach((i, k) => { if (Math.abs(i.getBoundingClientRect().left - e.clientX) < 160) i.style.setProperty('--sw', v); });
-});
+  flagV = Math.max(-20, Math.min(20, (e.clientX - lastMX) * .6)); lastMX = e.clientX; flagAt = e.clientX;
+  if (flagQueued) return; flagQueued = true;
+  requestAnimationFrame(() => { flagQueued = false; flags.forEach((i, k) => { if (Math.abs(flagX[k] - flagAt) < 160) i.style.setProperty('--sw', flagV); }); });
+}, { passive: true });
 
 /* ---------- scroll suave ---------- */
 let lenis = null;

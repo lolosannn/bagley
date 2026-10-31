@@ -50,15 +50,19 @@ function makeRelief(bounds, draw, px = 1024, blur = 2.2) {
   const [minx, maxx, miny, maxy] = bounds;
   const W = maxx - minx, H = maxy - miny;
   const cw = px, ch = Math.round(px * H / W), s = cw / W;
-  const c = document.createElement('canvas'); c.width = cw; c.height = ch;
-  const ctx = c.getContext('2d');
-  ctx.fillStyle = '#000'; ctx.fillRect(0, 0, cw, ch);
+  // se dibuja nítido y se desenfoca una sola vez (desenfocar cada trazo por separado congelaba el navegador)
+  const raw = document.createElement('canvas'); raw.width = cw; raw.height = ch;
+  const rctx = raw.getContext('2d');
+  rctx.fillStyle = '#000'; rctx.fillRect(0, 0, cw, ch);
   const P = (x, y) => [(x - minx) * s, (maxy - y) * s];
   const S = v => v * s;
+  rctx.fillStyle = rctx.strokeStyle = '#fff';
+  rctx.lineCap = rctx.lineJoin = 'round';
+  draw(rctx, P, S);
+  const c = document.createElement('canvas'); c.width = cw; c.height = ch;
+  const ctx = c.getContext('2d', { willReadFrequently: true });
   ctx.filter = `blur(${blur}px)`;
-  ctx.fillStyle = ctx.strokeStyle = '#fff';
-  ctx.lineCap = ctx.lineJoin = 'round';
-  draw(ctx, P, S);
+  ctx.drawImage(raw, 0, 0);
   ctx.filter = 'none';
   const data = ctx.getImageData(0, 0, cw, ch).data;
   const h = new Float32Array(cw * ch);
@@ -72,13 +76,23 @@ function makeRelief(bounds, draw, px = 1024, blur = 2.2) {
 }
 
 // mapa de normales a partir del relieve + poros de masa horneada
+// poros: un mosaico de ruido de 256 px calculado una vez por escala y repetido
+const PORE_T = 256, poreCache = {};
+function poreTile(scale) {
+  if (poreCache[scale]) return poreCache[scale];
+  const t = new Float32Array(PORE_T * PORE_T);
+  for (let y = 0; y < PORE_T; y++) for (let x = 0; x < PORE_T; x++) t[y * PORE_T + x] = fbm(x / scale, y / scale) + .5 * vnoise(x / (scale * .35), y / (scale * .35));
+  return (poreCache[scale] = t);
+}
 function makeNormalMap(relief, strength, poreAmt, poreScale) {
   const { h, cw, ch } = relief;
   const hh = new Float32Array(h.length);
+  const tile = poreTile(poreScale);
   for (let y = 0; y < ch; y++) for (let x = 0; x < cw; x++) {
     const i = y * cw + x;
-    const pores = poreAmt * (fbm(x / poreScale, y / poreScale) + .5 * vnoise(x / (poreScale * .35), y / (poreScale * .35)));
-    hh[i] = h[i] * strength + pores;
+    // repetición en espejo: sin costuras visibles entre mosaicos
+    const tx = x & 511, ty = y & 511;
+    hh[i] = h[i] * strength + poreAmt * tile[(ty < 256 ? ty : 511 - ty) * PORE_T + (tx < 256 ? tx : 511 - tx)];
   }
   const c = document.createElement('canvas'); c.width = cw; c.height = ch;
   const ctx = c.getContext('2d'); const img = ctx.createImageData(cw, ch); const d = img.data;
