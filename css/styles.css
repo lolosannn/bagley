@@ -269,6 +269,7 @@ button { font: inherit; color: inherit; }
 .figu .back { transform: rotateY(180deg); align-content: center; gap: 12px; font-size: 15px; font-weight: 700; background: var(--c); color: var(--blanco); }
 .figu .back b { display: block; font-family: var(--f-display); font-size: 54px; line-height: 1; color: var(--blanco); }
 .figu.gold .art { background: linear-gradient(135deg, #FFE680, #E8A800 50%, #FFF0A0); color: var(--rojo); }
+.figu.gold .art.photo em { color: var(--rojo); }
 .figu.gold .back { color: var(--choco); }
 .figu.gold .back b { color: var(--rojo); }
 .figu.stuck { --flip: 1; }
