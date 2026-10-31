@@ -3,7 +3,9 @@ import { sound } from './sound.js';
 
 const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const ease = t => 1 - Math.pow(1 - t, 3);
-const CR = .22, F0 = -.38;
+const CR = .22;
+// cuánto se juntan los pedazos antes del crack (las fotos partidas en 2 ya vienen casi armadas)
+const F0S = { rumba: -.1, mellizas: -.02 }, F0_DEF = -.38, F1 = .4;
 
 export async function initCrack(sections, base = 'assets/fotos/') {
   const PARTS = await fetch(base + 'partes.json').then(r => r.json());
@@ -14,6 +16,7 @@ export async function initCrack(sections, base = 'assets/fotos/') {
   sections.forEach(sec => {
     const name = sec.dataset.cookie, items = PARTS[name], stage = sec.querySelector('.stage');
     const pieces = items.filter(t => t.kind === 'piece');
+    const F0 = F0S[name] ?? F0_DEF;
     let cx = 0, cy = 0, A = 0;
     for (const p of pieces) { cx += (p.x + p.w / 2) * p.area; cy += (p.y + p.h / 2) * p.area; A += p.area; }
     cx /= A; cy /= A;
@@ -50,7 +53,7 @@ export async function initCrack(sections, base = 'assets/fotos/') {
     whole.onload = place; if (whole.complete) place();
 
     const meters = [...sec.querySelectorAll('.meter')].map(m => ({ bar: m.querySelector('b'), num: m.querySelector('span'), v: +m.dataset.v }));
-    scenes.push({ sec, stage, layers, meters, whole, cracked: false });
+    scenes.push({ sec, stage, layers, meters, whole, F0, cracked: false });
   });
 
   function frame() {
@@ -76,7 +79,7 @@ export async function initCrack(sections, base = 'assets/fotos/') {
       for (const L of s.layers) {
         let x, y, rot, op = 1;
         if (L.kind === 'piece') {
-          const f = F0 + open * .78;
+          const f = s.F0 + open * (F1 - s.F0);
           x = L.dx * f * W; y = L.dy * f * W; rot = L.spin * open;
         } else {
           const f = open * (L.kind === 'extra' ? 1 : 1.6);
