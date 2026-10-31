@@ -13,3 +13,11 @@ Sitio estático interactivo para Bagley (160 años). Proyecto de portfolio de Av
 Settings → Pages → Source: *Deploy from a branch* → rama `claude/kind-turing-x2nypw`, carpeta `/ (root)`.
 
 Para probar local: `python3 -m http.server` en la carpeta y abrir http://localhost:8000 (hace falta servidor, no abrir el archivo directo).
+
+## Seguridad
+
+Ver `SECURITY.md`. Para proteger el repo en GitHub (lo hace el dueño desde Settings):
+
+- **Branches → Add rule** sobre la rama publicada: *Require a pull request before merging* y *Do not allow bypassing*.
+- **Actions → General**: *Require approval for all outside collaborators* (no hay workflows, pero evita que se agreguen sin revisión).
+- **Code security**: activar *Secret scanning* y *Dependabot alerts*.

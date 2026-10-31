@@ -6,6 +6,9 @@
 <title>Bagley · 160 años rellenos de sabor</title>
 <meta name="description" content="Concepto web interactivo para Bagley: galletitas que llenan la pantalla, galletitas que se parten con el scroll, álbum de figuritas y una piñata. Proyecto de portfolio no oficial.">
 <meta name="theme-color" content="#E3202A">
+<!-- Seguridad: solo se cargan recursos propios, Lenis desde jsDelivr y las tipografías de Google -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src 'self'; media-src 'self'; object-src 'none'; base-uri 'self'; form-action 'none'; upgrade-insecure-requests">
+<meta name="referrer" content="strict-origin-when-cross-origin">
 <meta property="og:title" content="Bagley · 160 años rellenos de sabor">
 <meta property="og:description" content="Concepto web interactivo. Proyecto de portfolio de Avanth Studio, no oficial.">
 <link rel="icon" type="image/png" href="assets/logo-bagley.png">
@@ -13,7 +16,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Londrina+Solid:wght@300;400;900&family=Nunito:wght@400;600;700;800;900&family=Yellowtail&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/styles.css">
-<script src="https://cdn.jsdelivr.net/npm/lenis@1.1.13/dist/lenis.min.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/lenis@1.1.13/dist/lenis.min.js" integrity="sha384-B2WBjDzEjJpYvhmi2UyEn7rektqkf5suS6sNoyyrf0EBAwBHdkiXxIlU0V5Ru2ed" crossorigin="anonymous" defer></script>
 <script type="module" src="js/main.js"></script>
 </head>
 <body>
@@ -198,7 +201,7 @@
   <div class="foot-word" aria-hidden="true"><img src="assets/logo-bagley.png" alt="" width="248" height="157" loading="lazy"></div>
   <div class="foot-info wrap">
     <p>Proyecto conceptual de portfolio. No es un sitio oficial ni está afiliado a Bagley; las marcas pertenecen a sus titulares. Imágenes de galletitas generadas con IA.</p>
-    <p>Diseño y desarrollo: <a href="https://avanth.com.ar">Avanth Studio</a> · Pssst: escribí “rumba”.</p>
+    <p>Diseño y desarrollo: <a href="https://avanth.com.ar" target="_blank" rel="noopener noreferrer">Avanth Studio</a> · Pssst: escribí “rumba”.</p>
   </div>
 </footer>
 </body>
