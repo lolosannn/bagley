@@ -78,7 +78,7 @@ body { background: var(--rojo); color: var(--blanco); font-family: var(--f-body)
     <path d="M86 118 C120 112 160 104 196 84" fill="none" stroke="#FFFFFF" stroke-width="4.5" stroke-linecap="round" transform="rotate(-7 122 96)"/>
   </svg>
   <h1>¡Crack!</h1>
-  <p>Galletitas partidas con fotos. Cada pedazo y cada miga es una capa aparte: mientras bajás, la galletita se rompe, los pedazos se separan y las migas salen volando. Mové el mouse y todo responde con profundidad.</p>
+  <p>Arranca entera. Mientras bajás tiembla, hace crack y se parte: cada pedazo y cada miga es una capa aparte que se separa con el scroll. Mové el mouse y todo responde con profundidad.</p>
   <span class="down">Bajá para partirlas</span>
 </header>
 
@@ -166,8 +166,28 @@ document.querySelectorAll('.scene').forEach(sec => {
     stage.appendChild(img);
     layers.push({ img, kind: 'extra', dx: Math.cos(a) * r * 2.4, dy: Math.sin(a) * r * 2.4, depth: 1 + rnd() * 2, spin: (rnd() - .5) * 400 });
   }
+  // la galletita entera: se ubica sobre el bloque de pedazos juntos y se cambia por ellos en el crack
+  const F0 = -.38;
+  let bx0 = 1, by0 = 1, bx1 = 0, by1 = 0;
+  for (const t of pieces) {
+    const ox = (t.x + t.w / 2 - cx) * F0, oy = (t.y + t.h / 2 - cy) * F0;
+    bx0 = Math.min(bx0, t.x + ox); by0 = Math.min(by0, t.y + oy);
+    bx1 = Math.max(bx1, t.x + t.w + ox); by1 = Math.max(by1, t.y + t.h + oy);
+  }
+  const whole = new Image();
+  whole.src = 'fotos/' + name + '-entera.webp'; whole.alt = ''; whole.className = 'piece whole';
+  // mismo "peso" visual que los pedazos juntos: igualar superficie, respetando la proporción de la foto
+  const place = () => {
+    const asp = whole.naturalWidth / whole.naturalHeight || 1.4;
+    const ww = Math.min(.8, Math.sqrt(.78 * (bx1 - bx0) * (by1 - by0) * asp)), wh = ww / asp;
+    whole.style.width = ww * 100 + '%';
+    whole.style.left = ((bx0 + bx1) / 2 - ww / 2) * 100 + '%';
+    whole.style.top = ((by0 + by1) / 2 - wh / 2) * 100 + '%';
+  };
+  whole.onload = place; if (whole.complete) place();
+  stage.appendChild(whole);
   const meters = [...sec.querySelectorAll('.meter')].map(m => ({ bar: m.querySelector('b'), num: m.querySelector('span'), v: +m.dataset.v }));
-  scenes.push({ sec, stage, layers, meters });
+  scenes.push({ sec, stage, layers, meters, whole });
 });
 
 const ease = t => 1 - Math.pow(1 - t, 3);
@@ -178,9 +198,18 @@ function frame() {
     if (r.bottom < 0 || r.top > innerHeight) continue;
     const span = r.height - innerHeight;
     let p = reduce ? 1 : Math.min(1, Math.max(0, -r.top / span));
+    if (p >= .22 && !s.cracked) { s.cracked = true; s.stage.animate([{ transform: 'scale(1.06)' }, { transform: 'scale(1)' }], { duration: 260, easing: 'ease-out' }); }
+    if (p < .22) s.cracked = false;
     // 0–.18 entera, .18–.24 temblor del crack, .24–1 se separa
-    const shake = p > .16 && p < .26 ? Math.sin(p * 900) * (1 - Math.abs(p - .21) / .05) * 4 : 0;
-    const open = ease(Math.min(1, Math.max(0, (p - .2) / .7)));
+    // 0–.14 entera flotando · .14–.22 tiembla cada vez más · .22 crack: cambia a pedazos · después se separan
+    const CR = .22;
+    const shakeAmt = p > .14 && p < CR ? Math.pow((p - .14) / (CR - .14), 2) : 0;
+    const shake = Math.sin(p * 1400) * shakeAmt * 9;
+    const broken = p >= CR;
+    const open = ease(Math.min(1, Math.max(0, (p - CR) / .68)));
+    const bob = Math.sin(performance.now() / 700) * 6;
+    s.whole.style.opacity = broken ? 0 : 1;
+    s.whole.style.transform = `translate3d(${(mouse.x * 30 + shake).toFixed(1)}px, ${(mouse.y * 22 + bob).toFixed(1)}px, 0) rotate(${(mouse.x * 4 + shake * .4).toFixed(2)}deg) scale(${(1 + shakeAmt * .04).toFixed(3)})`;
     const W = s.stage.clientWidth;
     for (const L of s.layers) {
       let x, y, rot, op = 1;
@@ -191,11 +220,11 @@ function frame() {
       } else {
         const f = open * (L.kind === 'extra' ? 1 : 1.6);
         x = L.dx * f * W; y = L.dy * f * W + open * open * 40 * L.depth; rot = L.spin * open;
-        op = Math.min(1, open * 4);
+        op = Math.min(1, .3 + open * 4);
       }
       x += mouse.x * 40 * L.depth + shake; y += mouse.y * 30 * L.depth;
       L.img.style.transform = `translate3d(${x.toFixed(1)}px, ${y.toFixed(1)}px, 0) rotate(${rot.toFixed(2)}deg)`;
-      L.img.style.opacity = op;
+      L.img.style.opacity = broken ? op : 0;
     }
     for (const m of s.meters) { const v = Math.round(m.v * Math.min(1, open * 1.2)); m.bar.style.width = v + '%'; m.num.textContent = v + '%'; }
   }
