@@ -136,7 +136,7 @@ button { font: inherit; color: inherit; }
   position: sticky; top: 0; height: 100vh; overflow: hidden;
   background: radial-gradient(circle at 50% 58%, #F23A43 0, var(--rojo) 45%, var(--rojo-hondo) 100%);
 }
-#hero-canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; z-index: 2; touch-action: pan-y; }
+#hero-canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; z-index: 2; pointer-events: none; }
 .hero-copy { position: absolute; left: 0; right: 0; top: 50%; transform: translateY(-55%) scale(calc(1 - var(--fill, 0) * .12)); z-index: 1; text-align: center; pointer-events: none; }
 .hero-copy .kicker { margin-bottom: 6px; }
 .hero-title { display: grid; justify-items: center; line-height: .8; }
