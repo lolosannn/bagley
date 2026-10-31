@@ -105,6 +105,7 @@ function maniUpdate() {
   words.forEach((w, i) => w.classList.toggle('on', i < n));
   const sr = maniSec.getBoundingClientRect();
   if (sr.top < innerHeight * .6 && sr.bottom > 0) $$('[data-pop]').forEach(s => s.classList.add('on'));
+  const st = $('.stats').getBoundingClientRect(); if (st.top < innerHeight * .85) $('.stats').classList.add('on');
 }
 addEventListener('scroll', maniUpdate, { passive: true }); maniUpdate();
 
