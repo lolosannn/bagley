@@ -305,16 +305,23 @@ button { font: inherit; color: inherit; }
   .hp-merengadas { width: 44vw; right: -7vw; top: 20vh; }
   .hp-mellizas { width: 32vw; right: -4vw; left: auto; top: auto; bottom: 18vh; }
   .hero-hint { border-radius: 22px; font-size: 14px; text-align: center; width: max-content; max-width: 70vw; }
-  .stats { grid-template-columns: repeat(2, 1fr); }
+  .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; padding: 0 4px; }
+  .stat { padding: 20px 14px 18px; border-radius: 20px; }
+  .stat b { font-size: clamp(44px, 13vw, 64px); }
+  .stat span { font-size: 12px; letter-spacing: .5px; overflow-wrap: anywhere; }
   .mani-top { grid-template-columns: 1fr; }
   .packs { margin-top: 4vh; justify-items: center; gap: 6vh; }
   .pack, .p-rumba, .p-mellizas { width: min(100%, 380px); justify-self: center; }
-  .stick { grid-template-columns: 1fr; grid-template-rows: auto 1fr; padding: 90px 22px 30px; align-items: start; gap: 10px; }
-  .copy p { font-size: 16px; }
-  .copy h3 { font-size: 76px; }
-  .meter { font-size: 13px; }
-  .meter i { height: 18px; }
-  .stage { width: min(92vw, 48vh); align-self: center; }
+  .stick { height: 100svh; grid-template-columns: 1fr; grid-template-rows: auto 1fr; padding: 76px 22px 16px; align-items: start; gap: 4px; }
+  .copy { gap: 8px; }
+  .copy .tag { font-size: 11px; }
+  .copy p { font-size: 14px; line-height: 1.4; }
+  .copy h3 { font-size: 60px; }
+  .meter { font-size: 12px; row-gap: 5px; }
+  .meter + .meter { margin-top: 2px; }
+  .meter span { font-size: 28px; }
+  .meter i { height: 14px; }
+  .stage { width: min(84vw, 40svh); align-self: start; margin-top: 2svh; }
   .album-stick { padding-top: 12vh; }
   .album-head h2 { font-size: clamp(40px, 12vw, 60px); }
   .about-grid { grid-template-columns: 1fr; }
